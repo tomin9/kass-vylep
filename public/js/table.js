@@ -123,6 +123,7 @@
                     syncDates($tr, isOd ? 'od' : 'do');
                     recalcRow($tr);
                     recalcTotals();
+                    scheduleSave($tr);
                 }
             });
 
@@ -227,6 +228,7 @@
         $wrap.find('.kp-ac-nazov').val(nazov);
         $wrap.closest('tr').attr('data-org', nazov);
         acHide($wrap);
+        scheduleSave($wrap.closest('tr'));
     }
 
     function initAC($wrap) {
@@ -289,8 +291,33 @@
         if (!$(e.target).closest('.kp-ac-wrap').length) { $('.kp-ac-drop').hide(); }
     });
 
+    /* ===== AUTOMATICKÉ UKLADANIE ===== */
+    var AUTOSAVE_DELAY = 1200; // ms po poslednej zmene
+
+    function rowHasContent($tr) {
+        return !!(($tr.find('.kp-ac-nazov').val() || '').trim()
+               || ($tr.find('.kp-ac-input').val() || '').trim()
+               || ($tr.find('.kp-akcia').val() || '').trim());
+    }
+
+    function scheduleSave($tr) {
+        if (!$tr || !$tr.length) { return; }
+        var id = parseInt($tr.data('id'), 10) || 0;
+        // Nový riadok ulož až keď má aspoň organizáciu alebo názov akcie
+        if (!id && !rowHasContent($tr)) { return; }
+        clearTimeout($tr.data('kp-save-t'));
+        $tr.data('kp-save-t', setTimeout(function () {
+            // Ak ešte beží predchádzajúce ukladanie, počkaj naň
+            if ($tr.hasClass('kp-saving') || $tr.hasClass('kp-autosave')) {
+                scheduleSave($tr);
+                return;
+            }
+            saveRow($tr, true);
+        }, AUTOSAVE_DELAY));
+    }
+
     /* ===== ULOŽIŤ ===== */
-    function saveRow($tr) {
+    function saveRow($tr, auto) {
         var id       = parseInt($tr.data('id'), 10) || 0;
         var $wrap    = $tr.find('.kp-ac-wrap');
         var orgId    = $wrap.find('.kp-ac-id').val();
@@ -312,9 +339,10 @@
             ine:               String($tr.find('.kp-ine').val()).replace(/\s*€/g, '').replace(',', '.'),
         };
 
-        $tr.addClass('kp-saving');
+        // Autosave nesmie zablokovať riadok (pointer-events) počas písania
+        $tr.addClass(auto ? 'kp-autosave' : 'kp-saving');
         $.post(KP.ajax, data, function (res) {
-            $tr.removeClass('kp-saving');
+            $tr.removeClass('kp-saving kp-autosave');
             if (res.success) {
                 $tr.data('id', res.data.id).attr('data-id', res.data.id)
                    .attr('data-org', orgNazov)
@@ -326,6 +354,9 @@
             } else {
                 status('Chyba pri ukladaní.', false);
             }
+        }).fail(function () {
+            $tr.removeClass('kp-saving kp-autosave');
+            status('Chyba pri ukladaní.', false);
         });
     }
 
@@ -510,6 +541,13 @@
         // Zmeny v riadku
         $tbody.on('change', '.kp-format, .kp-kusy, .kp-tlac, .kp-ine', function () {
             recalcRow($(this).closest('tr')); recalcTotals();
+            scheduleSave($(this).closest('tr'));
+        });
+
+        // Automatické ukladanie pri písaní (okrem organizácie — tá sa ukladá
+        // až po výbere zo zoznamu, aby sa neukladali rozpísané názvy)
+        $tbody.on('input', '.kp-inp:not(.kp-ac-input)', function () {
+            scheduleSave($(this).closest('tr'));
         });
 
         // Formátovanie Tlač a Iné — blur: pridaj €, focus: zobraz číslo
@@ -521,7 +559,7 @@
             var val = parseNum($(this).val());
             $(this).val(val > 0 ? val.toFixed(2).replace('.', ',') : '');
         });
-        $tbody.on('change', '.kp-tyzdne', function () { syncDates($(this).closest('tr'), 'tyzdne'); recalcRow($(this).closest('tr')); recalcTotals(); });
+        $tbody.on('change', '.kp-tyzdne', function () { syncDates($(this).closest('tr'), 'tyzdne'); recalcRow($(this).closest('tr')); recalcTotals(); scheduleSave($(this).closest('tr')); });
 
         // Uložiť
         $tbody.on('click', '.kp-btn-save', function () { saveRow($(this).closest('tr')); });
@@ -550,6 +588,7 @@
             $wrap.find('.kp-fmt-drop').removeClass('open');
             recalcRow($(this).closest('tr'));
             recalcTotals();
+            scheduleSave($(this).closest('tr'));
         });
         $(document).on('click', function () { $('.kp-fmt-drop').removeClass('open'); });
 
@@ -573,6 +612,7 @@
             $wrap.find('.kp-platba-drop').removeClass('open');
             recalcRow($(this).closest('tr'));
             recalcTotals();
+            scheduleSave($(this).closest('tr'));
         });
         // Zatvoriť kliknutím mimo
         $(document).on('click', function () { $('.kp-platba-drop').removeClass('open'); });
