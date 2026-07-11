@@ -107,8 +107,8 @@ body:has(#kp-app) {
     background: rgba(18,18,18,.94);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    padding: 10px 0;
-    margin-bottom: 2px;
+    padding: 10px 0 0;
+    margin-bottom: 0;
 }
 /* Odsadenie pod WP admin bar */
 body.admin-bar .kp-sticky-top { top: 32px; }
@@ -116,6 +116,33 @@ body.admin-bar .kp-sticky-top { top: 32px; }
     body.admin-bar .kp-sticky-top { top: 46px; }
 }
 .kp-sticky-top .kp-toolbar { margin-bottom: 0; }
+
+/* Ukotvená hlavička stĺpcov v sticky paneli */
+.kp-head-wrap {
+    margin-top: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.08);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    background: rgba(0,0,0,.85);
+}
+.kp-head-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+.kp-head-table thead th { position: static; }
+
+/* Pôvodná hlavička v scrollovacej tabuľke — neviditeľná, len drží šírky stĺpcov */
+.kp-table thead.kp-thead-src th {
+    position: static;
+    height: 0 !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    border: none !important;
+    overflow: hidden;
+}
 
 /* Hlavička — transparentná, vychádza z témy */
 .kp-header {
@@ -188,9 +215,10 @@ body.admin-bar .kp-sticky-top { top: 32px; }
        takže hlavička stĺpcov (sticky top) a Spolu (sticky bottom) neodídu */
     height: calc(100vh - var(--kp-sticky-offset, 220px));
     overscroll-behavior: contain;
-    border-radius: 10px;
+    border-radius: 0 0 10px 10px;
     box-shadow: 0 4px 20px rgba(0,0,0,.4);
     border: 1px solid rgba(255,255,255,.08);
+    border-top: none;
 }
 .kp-table { width: 100%; border-collapse: collapse; background: rgba(15,15,15,.85); table-layout: auto; }
 
@@ -378,6 +406,16 @@ input[type="number"].kp-inp { text-align: center; }
     .kp-table-wrap { overflow: visible; height: auto !important; box-shadow: none; border: none; border-radius: 0; }
     .kp-table { background: #fff !important; font-size: 8pt; }
     .kp-table thead th { background: #1a1a1a !important; color: #fff !important; font-size: 7.5pt; padding: 4px 3px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    /* Sticky panel je pri tlači skrytý — obnov hlavičku stĺpcov v tabuľke */
+    .kp-table thead.kp-thead-src th {
+        position: static;
+        height: auto !important;
+        padding: 4px 3px !important;
+        font-size: 7.5pt !important;
+        line-height: 1.2 !important;
+        border-bottom: 1px solid #999 !important;
+        overflow: visible;
+    }
     .kp-row td { color: #000 !important; padding: 3px; border-bottom: 1px solid #ddd; }
     .kp-table tfoot td { background: #f3f4f6 !important; color: #000 !important; border-top: 2px solid #999 !important; }
     .kp-inp, .kp-sel { border: none; background: transparent; color: #000 !important; }

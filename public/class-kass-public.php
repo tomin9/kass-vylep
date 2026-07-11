@@ -239,33 +239,41 @@ class KASS_Vylep_Public {
                 </div>
             </div>
 
+            <?php
+            $thead_row = '<tr>
+                <th class="kp-th-num">Č.</th>
+                <th class="kp-th-platba">Platba</th>
+                <th class="kp-th-fmt">Formát</th>
+                <th class="kp-th-org">Organizácia</th>
+                <th class="kp-th-akcia">Názov akcie</th>
+                <th class="kp-th-date">Od</th>
+                <th class="kp-th-date">Do</th>
+                <th class="kp-th-sm">Týždne</th>
+                <th class="kp-th-sm">Kusy</th>
+                <th class="kp-th-num2">Cenník</th>
+                <th class="kp-th-num2">Výlep</th>
+                <th class="kp-th-num2">Tlač</th>
+                <th class="kp-th-num2">Iné</th>
+                <th class="kp-th-num2">Hotovosť</th>
+                <th class="kp-th-num2">Faktúra</th>
+                <th class="kp-th-num2">Zadarmo</th>
+                <th class="kp-th-num2">Kartou</th>
+                <th class="kp-th-act">Akcie</th>
+            </tr>';
+            ?>
+            <!-- Ukotvená hlavička stĺpcov (šírky synchronizuje JS s tabuľkou) -->
+            <div class="kp-head-wrap" id="kp-head-wrap">
+                <table class="kp-table kp-head-table" id="kp-head-table">
+                    <thead><?php echo $thead_row; ?></thead>
+                </table>
+            </div>
+
             </div><!-- .kp-sticky-top -->
 
             <!-- Tabuľka -->
             <div class="kp-table-wrap">
                 <table class="kp-table" id="kp-table">
-                    <thead>
-                        <tr>
-                            <th class="kp-th-num">Č.</th>
-                            <th class="kp-th-platba">Platba</th>
-                            <th class="kp-th-fmt">Formát</th>
-                            <th class="kp-th-org">Organizácia</th>
-                            <th class="kp-th-akcia">Názov akcie</th>
-                            <th class="kp-th-date">Od</th>
-                            <th class="kp-th-date">Do</th>
-                            <th class="kp-th-sm">Týždne</th>
-                            <th class="kp-th-sm">Kusy</th>
-                            <th class="kp-th-num2">Cenník</th>
-                            <th class="kp-th-num2">Výlep</th>
-                            <th class="kp-th-num2">Tlač</th>
-                            <th class="kp-th-num2">Iné</th>
-                            <th class="kp-th-num2">Hotovosť</th>
-                            <th class="kp-th-num2">Faktúra</th>
-                            <th class="kp-th-num2">Zadarmo</th>
-                            <th class="kp-th-num2">Kartou</th>
-                            <th class="kp-th-act">Akcie</th>
-                        </tr>
-                    </thead>
+                    <thead class="kp-thead-src"><?php echo $thead_row; ?></thead>
                     <tbody id="kp-tbody">
                         <?php
                         $i = 1;
