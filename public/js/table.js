@@ -792,14 +792,26 @@
             document.body.classList.add('kp-scroll-lock');
             window.scrollTo(0, 0);
 
-            // Tabuľka musí štartovať navrchu — prehliadač vie po načítaní
-            // obnoviť starú scroll pozíciu kontajnera; pripni ju na 0.
+            // Tabuľka musí štartovať navrchu — prehliadač aj skripty témy vedia
+            // scroll kontajnera po načítaní posunúť (rôzne neskoro). Strážca:
+            // kým sa používateľ sám nedotkne stránky, každý programový scroll
+            // v prvých sekundách po načítaní vráť na 0.
             var wrapEl = document.querySelector('.kp-table-wrap');
             if (wrapEl) {
+                var userTouched = false;
+                ['wheel', 'touchstart', 'mousedown', 'keydown'].forEach(function (ev) {
+                    window.addEventListener(ev, function () { userTouched = true; }, { passive: true, capture: true });
+                });
+                var guardEnd = Date.now() + 3000;
                 wrapEl.scrollTop = 0;
+                wrapEl.addEventListener('scroll', function () {
+                    if (!userTouched && Date.now() < guardEnd && wrapEl.scrollTop !== 0) {
+                        wrapEl.scrollTop = 0;
+                    }
+                }, { passive: true });
                 window.addEventListener('load', function () {
-                    wrapEl.scrollTop = 0;
-                    setTimeout(function () { wrapEl.scrollTop = 0; }, 250);
+                    guardEnd = Date.now() + 3000; // predĺž strážcu od dokončenia načítania
+                    if (!userTouched) { wrapEl.scrollTop = 0; }
                 });
             }
         }

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Výlep plagátov
  * Description: Evidencia výlepu plagátov, databáza odberateľov, cenník, generátor podkladu k fakturácii a týždenný zoznam plagátov, ktoré sa nesmú prelepiť.
- * Version: 1.3.7
+ * Version: 1.3.8
  * Author: OZ Ars Preuge
  * Text Domain: kass-vylep
  * Requires at least: 5.8
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; // priamy prístup zakázaný
 }
 
-define( 'KASS_VYLEP_VERSION', '1.3.7' );
+define( 'KASS_VYLEP_VERSION', '1.3.8' );
 define( 'KASS_VYLEP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'KASS_VYLEP_URL', plugin_dir_url( __FILE__ ) );
 
