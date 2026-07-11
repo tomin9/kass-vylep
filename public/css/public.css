@@ -16,12 +16,21 @@ body .post-content {
 body .fusion-page-title-bar { display: none !important; }
 body #content .entry-title,
 body .fusion-post-title { display: none !important; }
-body #main { padding-top: 0 !important; }
+body #main { padding-top: 0 !important; padding-bottom: 0 !important; }
 body #main > .fusion-row { padding-top: 0 !important; }
 body .post-content > .fusion-fullwidth:first-child {
     padding-top: 0 !important;
     margin-top: 0 !important;
 }
+/* Medzera pod tabuľkou — skry pätičku témy na stránke aplikácie */
+body .fusion-footer,
+body .fusion-tb-footer,
+body #footer,
+body .fusion-footer-widget-area,
+body .fusion-footer-copyright-area {
+    display: none !important;
+}
+body .fusion-fullwidth { padding-bottom: 0 !important; margin-bottom: 0 !important; }
 
 /* position: sticky nefunguje, ak má niektorý rodič overflow: hidden */
 body #wrapper,
@@ -39,7 +48,7 @@ body .fusion-text {
 /* ===== WRAPPER ===== */
 .kp-fullwidth {
     box-sizing: border-box;
-    padding-bottom: 60px;
+    padding-bottom: 0;
 }
 .kp-app {
     max-width: none !important;
@@ -168,7 +177,9 @@ body.admin-bar .kp-sticky-top { top: 32px; }
 .kp-table-wrap {
     overflow-x: auto;
     overflow-y: auto;
-    max-height: calc(100vh - var(--kp-sticky-offset, 220px));
+    /* Vyplní presne zvyšok obrazovky — scroluje sa len vnútro tabuľky,
+       takže hlavička stĺpcov (sticky top) a Spolu (sticky bottom) neodídu */
+    height: calc(100vh - var(--kp-sticky-offset, 220px));
     border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0,0,0,.4);
     border: 1px solid rgba(255,255,255,.08);
@@ -253,11 +264,9 @@ body.admin-bar .kp-sticky-top { top: 32px; }
     color: #fff;
     box-shadow: inset 0 2px 0 rgba(255,255,255,.08);
 }
-/* Medzera 10px medzi tbody a tfoot */
 .kp-table tbody tr:last-child td {
     border-bottom: none;
 }
-.kp-table tfoot { border-top: 10px solid transparent; }
 .kp-sum { text-align: center; }
 /* Sticky súčtový riadok */
 .kp-table tfoot tr td {
@@ -358,7 +367,7 @@ input[type="number"].kp-inp { text-align: center; }
     html, body { background: #fff !important; color: #000 !important; }
     .kp-sticky-top, .kp-header, .kp-toolbar, .kp-actions, .kp-logout { display: none !important; }
     .kp-fullwidth { padding: 0 !important; }
-    .kp-table-wrap { overflow: visible; box-shadow: none; border: none; border-radius: 0; }
+    .kp-table-wrap { overflow: visible; height: auto !important; box-shadow: none; border: none; border-radius: 0; }
     .kp-table { background: #fff !important; font-size: 8pt; }
     .kp-table thead th { background: #1a1a1a !important; color: #fff !important; font-size: 7.5pt; padding: 4px 3px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .kp-row td { color: #000 !important; padding: 3px; border-bottom: 1px solid #ddd; }
