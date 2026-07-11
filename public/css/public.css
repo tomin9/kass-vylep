@@ -229,6 +229,11 @@ body.kp-scroll-lock {
     min-height: 0;
     overscroll-behavior: contain;
     overflow-anchor: none; /* prehliadač nesmie sám korigovať scroll pri zmenách obsahu */
+    /* column-reverse = scroll natívne štartuje na SPODKU (ako chat).
+       Jediné dieťa je celá tabuľka, takže poradie riadkov sa nemení.
+       Scroll 0 = koniec zoznamu — žiadny skript ho nevie "vrátiť hore". */
+    display: flex;
+    flex-direction: column-reverse;
     border-radius: 0 0 10px 10px;
     box-shadow: 0 4px 20px rgba(0,0,0,.4);
     border: 1px solid rgba(255,255,255,.08);
@@ -424,7 +429,7 @@ input[type="number"].kp-inp { text-align: center; }
         background: #fff !important;
     }
     .kp-app { display: block !important; }
-    .kp-table-wrap { overflow: visible; height: auto !important; box-shadow: none; border: none; border-radius: 0; }
+    .kp-table-wrap { overflow: visible; display: block !important; height: auto !important; box-shadow: none; border: none; border-radius: 0; }
     .kp-table { background: #fff !important; font-size: 8pt; }
     .kp-table thead th { background: #1a1a1a !important; color: #fff !important; font-size: 7.5pt; padding: 4px 3px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     /* Sticky panel je pri tlači skrytý — obnov hlavičku stĺpcov v tabuľke */

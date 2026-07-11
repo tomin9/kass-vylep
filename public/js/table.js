@@ -792,31 +792,8 @@
             document.body.classList.add('kp-scroll-lock');
             window.scrollTo(0, 0);
 
-            // Po načítaní zobraz KONIEC tabuľky (posledné záznamy) — poradie
-            // riadkov ostáva 1…n. Strážca: kým sa používateľ sám nedotkne
-            // stránky, drž scroll na spodku (prehliadač aj skripty témy ho
-            // vedia po načítaní svojvoľne posunúť, aj obsah mení výšku).
-            var wrapEl = document.querySelector('.kp-table-wrap');
-            if (wrapEl) {
-                var userTouched = false;
-                ['wheel', 'touchstart', 'mousedown', 'keydown'].forEach(function (ev) {
-                    window.addEventListener(ev, function () { userTouched = true; }, { passive: true, capture: true });
-                });
-                function pinBottom() { wrapEl.scrollTop = wrapEl.scrollHeight; }
-                function isAtBottom() { return wrapEl.scrollTop + wrapEl.clientHeight >= wrapEl.scrollHeight - 2; }
-                pinBottom();
-                // Bez časového limitu — kým sa používateľ sám nedotkne stránky,
-                // každý cudzí posun scrollu sa vráti na koniec. Prvý dotyk
-                // (koliesko/klik/dotyk/klávesa) strážcu natrvalo vypne.
-                wrapEl.addEventListener('scroll', function () {
-                    if (!userTouched && !isAtBottom()) { pinBottom(); }
-                }, { passive: true });
-                window.addEventListener('load', function () {
-                    if (!userTouched) { pinBottom(); }
-                    setTimeout(function () { if (!userTouched) { pinBottom(); } }, 250);
-                    setTimeout(function () { if (!userTouched) { pinBottom(); } }, 1000);
-                });
-            }
+            // Štart na konci zoznamu rieši CSS (flex-direction: column-reverse
+            // na .kp-table-wrap) — scroll 0 je tam spodok, netreba nič strážiť.
         }
 
         // Ukotvená hlavička stĺpcov — synchronizuj šírky s reálnou tabuľkou
