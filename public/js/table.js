@@ -821,6 +821,17 @@
         adjustStickyOffset();
         $(window).on('resize', adjustStickyOffset);
 
+        // Zamkni rolovanie stránky aj cez JS (poistka pre prehliadače bez :has)
+        // a vráť stránku úplne hore — prehliadač si po reloade pamätá starý scroll
+        // a stránka by sa zamkla v odrolovanom stave (odrezaný prvý riadok).
+        if (document.getElementById('kp-app')) {
+            if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
+            document.documentElement.classList.add('kp-scroll-lock');
+            document.body.classList.add('kp-scroll-lock');
+            window.scrollTo(0, 0);
+            setTimeout(function () { window.scrollTo(0, 0); }, 100);
+        }
+
         // Ukotvená hlavička stĺpcov — synchronizuj šírky s reálnou tabuľkou
         function syncHeadWidths() {
             var main = document.getElementById('kp-table');
