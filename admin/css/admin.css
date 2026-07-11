@@ -1,0 +1,182 @@
+/* ========== Všeobecné ========== */
+.kass-wrap .kass-lead { font-size: 13px; color: #555; margin: 8px 0 16px; }
+.kass-table th { font-weight: 600; }
+.kass-table td, .kass-table th { font-size: 13px; }
+.kass-past { color: #b32d2e; }
+.kass-future { color: #1e7e34; font-weight: 600; }
+
+/* Široká tabuľka evidencie */
+.kass-table-scroll { overflow-x: auto; margin-top: 10px; }
+.kass-evidencia { min-width: 1200px; }
+.kass-evidencia th, .kass-evidencia td { font-size: 12px; padding: 6px 8px; white-space: nowrap; }
+.kass-evidencia td.num { text-align: right; }
+.kass-evidencia th { background: #b8cce4; color: #1a1a1a; font-weight: 700; text-align: center; border: 1px solid #95b3d7; }
+.kass-evidencia td { border: 1px solid #dbe5f1; }
+.kass-evidencia .kass-actions { white-space: nowrap; }
+.kass-total-row td { background: #dbe5f1; font-weight: 700; border-top: 2px solid #95b3d7; }
+.kass-tag { display: inline-block; font-size: 9px; font-weight: 700; background: #d97706; color: #fff; padding: 1px 4px; border-radius: 3px; vertical-align: middle; }
+.kass-cennik-h2 { margin-top: 26px; padding-bottom: 4px; border-bottom: 2px solid #b8cce4; }
+.kass-cennik-table input { text-align: right; }
+.kass-week-nav { margin: 14px 0 18px; display: flex; align-items: center; flex-wrap: wrap; }
+.kass-sumary { margin-top: 12px; font-size: 14px; }
+.kass-cennik-table input { text-align: right; }
+
+/* ========== Formulár ========== */
+.kass-form .description { color: #777; font-size: 12px; }
+
+/* ========== A4 Podklad k fakturácii ========== */
+.kass-faktura-wrap { background: #d0d0d0; margin: 0 -20px 0 -22px; padding: 20px 20px 40px; min-height: 100vh; }
+.kass-fakt-toolbar { background: #fff; padding: 10px 16px; border-radius: 6px; margin-bottom: 18px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; box-shadow: 0 1px 3px rgba(0,0,0,.1); max-width: 210mm; margin-left: auto; margin-right: auto; }
+.kass-fakt-toolbar .description { color: #888; font-size: 12px; }
+.kass-fakt-toolbar select { min-width: 220px; }
+
+.kass-a4 {
+    width: 210mm !important; min-height: 297mm; background: #fff !important; margin: 0 auto !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,.35) !important; padding: 2mm 10mm 8mm 10mm !important;
+    font-family: Arial, Helvetica, sans-serif !important; font-size: 10pt !important; color: #000 !important;
+    box-sizing: border-box !important;
+}
+.kass-a4 .fa4-title {
+    font-size: 13pt !important; font-weight: bold !important; text-align: center !important;
+    border: none !important;
+    padding: 4px 0 !important;
+    letter-spacing: .4px !important; margin-bottom: 4px !important;
+    display: block !important; width: 100% !important;
+}
+/* Globálny override pre ICO blok — bez akýchkoľvek čiar */
+.kass-a4 .fa4-ico-blok table,
+.kass-a4 .fa4-ico-blok tr,
+.kass-a4 .fa4-ico-blok td,
+.kass-a4 .fa4-ico-blok input {
+    border: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Hlavička — dodávateľ / odberateľ */
+.fa4-hlavicka { width: 100%; border-collapse: collapse; border: 1.5px solid #000; }
+.fa4-hlavicka td { font-size: 10pt; padding: 2px 8px; vertical-align: top; }
+.fa4-col-l  { width: 50%; }
+.fa4-col-r  { width: 50%; }
+.fa4-sect-lbl { font-weight: bold; font-size: 11pt; padding-top: 4px; padding-bottom: 0; line-height: 1.35; }
+.fa4-addr { font-size: 10pt; line-height: 1.35; padding-top: 1px; }
+.fa4-addr div { line-height: 1.35; margin: 0; }
+.fa4-addr div .fai { height: 1.35em; vertical-align: bottom; }
+.fa4-ico-blok table { width: 100%; border-collapse: collapse; }
+.fa4-ico-blok tr { border: none; }
+.fa4-ico-blok td { font-size: 10pt; padding: 0 4px; line-height: 1.35; vertical-align: baseline; border: none; }
+.fa4-ico-blok .fai,
+.fa4-ico-blok input {
+    border: none !important;
+    background: transparent;
+    height: 1.35em;
+    outline: none;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    line-height: 1.35;
+    padding: 0; margin: 0; color: #000; width: 100%;
+    box-shadow: none !important;
+}
+.ico-lbl { white-space: nowrap; width: 80px; }
+.fa4-divider td { border-top: 1.5px solid #000; }
+.fai {
+    border: none; background: transparent; outline: none;
+    font-family: Arial, Helvetica, sans-serif; font-size: 10pt;
+    width: 100%; display: block; line-height: 1.35;
+    padding: 0; margin: 0; color: #000;
+    height: 1.35em;
+}
+.fai::placeholder { color: #999; }
+.fai:focus { background: #f8f8f8; }
+.fai-bold { font-weight: bold; }
+.fai-last { }
+/* Inputy v ICO bloku — úplne bez borderu */
+.fa4-ico-blok .fai { height: auto; }
+
+/* Objednávka / zmluva */
+.fa4-obj { width: 100%; border-collapse: collapse; border: 1.5px solid #000; margin-top: 5px; margin-bottom: 5px; }
+.fa4-obj td { font-size: 10pt; padding: 2px 8px; vertical-align: top; line-height: 1.35; }
+.fa4-obj-l { width: 50%; border-right: none; }
+.fa4-obj-m { width: 38%; border-right: none; }
+.fa4-obj-r { width: 12%; text-align: center; font-weight: bold; font-size: 10pt; vertical-align: top; }
+.fa4-obj-row { display: flex; align-items: baseline; gap: 5px; margin-bottom: 0; line-height: 1.35; }
+.fa4-obj-row:last-child { margin-bottom: 0; }
+.fa4-obj-lbl { white-space: nowrap; }
+.fa4-line {
+    flex: 1; display: inline-block;
+    border: none !important; outline: none;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt; line-height: 1.35; padding: 0 2px;
+    cursor: text; min-width: 60px; max-width: 220px;
+}
+.fa4-line:focus { background: #fafafa; }
+.faf {
+    font-family: Arial, Helvetica, sans-serif; font-size: 10pt;
+    border: none !important; box-shadow: none !important;
+    border-radius: 0; padding: 0; background: transparent;
+    outline: none; color: #000; line-height: 1.35;
+    display: inline; width: auto;
+}
+.faf-sm { font-size: 9pt; }
+
+/* Položky — tabuľka s pravým stĺpcom pre cenu */
+.fa4-polozky-wrap { width: 100%; border-collapse: collapse; border: 1.5px solid #000; margin-bottom: 5px; }
+.fa4-polozky-wrap td { padding: 0; vertical-align: top; }
+.fa4-item-l { width: 88%; border-right: 1.5px solid #000; padding: 6px 8px !important; }
+.fa4-item-r { width: 12%; border-left: 1.5px solid #000; padding: 0; }
+.fa4-item-head { margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
+.fa4-item-head input { border: none !important; box-shadow: none !important; outline: none !important; font-weight: bold; font-size: 12pt; font-family: Arial, Helvetica, sans-serif; background: transparent !important; text-decoration: underline; flex: 1; padding: 0; color: #000; }
+.fa4-row { display: flex; align-items: baseline; gap: 6px; font-size: 9pt; margin-bottom: 2px; }
+.fa4-row b { min-width: 140px; white-space: nowrap; }
+.fa4-result { font-weight: bold; font-size: 9pt; }
+.fa4-cbdph { font-size: 9pt; color: #555; }
+.fa4-item-del { font-size: 8pt; padding: 2px 8px; border: 1px solid #dc2626; border-radius: 3px; background: #fff; color: #dc2626; cursor: pointer; white-space: nowrap; }
+.fa4-item-sep { border-top: 1px solid #ddd; }
+.fakt-additem { display: none; }
+.fa4-placeholder .fa4-ph-cell {
+    padding: 8px; cursor: pointer; vertical-align: middle;
+}
+.fa4-placeholder .fa4-ph-btn {
+    font-size: 8.5pt; color: #bbb;
+    pointer-events: none;
+}
+.fa4-placeholder:hover .fa4-ph-cell { background: #fafafa; }
+.fa4-placeholder:hover .fa4-ph-btn { color: #888; }
+.faf-sel { font-family: Arial, sans-serif; font-size: 9pt; border: 1px solid #ccc; border-radius: 2px; padding: 1px 3px; background: #fafafa; }
+
+/* Suma */
+.fa4-suma { width: 100%; border-collapse: collapse; border: 1.5px solid #000; margin-bottom: 5px; }
+.fa4-suma td { font-size: 10.5pt; font-weight: bold; padding: 4px 8px; vertical-align: middle; }
+.fa4-suma-lbl { }
+.fa4-suma-val { border-left: 1.5px solid #000; text-align: center; width: 12%; }
+
+/* Finančná kontrola */
+.fa4-fk { border: 1.5px solid #000; padding: 5px 7px; font-size: 9pt; line-height: 1.5; }
+.fa4-fk div { margin: 0; padding: 0; }
+.fa4-fk s { color: #666; }
+.fa4-fk-pod { display: flex; align-items: baseline; gap: 6px; }
+.fa4-fk-pod .faf-sm {
+    font-size: 9pt; line-height: 1.5;
+    border: none !important; background: transparent;
+    outline: none; padding: 0; height: auto;
+    -webkit-appearance: none; appearance: none;
+    color-scheme: light;
+    width: 80px;
+}
+.fa4-fk-grow { flex: 1; }
+.fa4-fk-date { font-size: 9pt; outline: none; min-width: 70px; cursor: text; }
+
+
+/* ========== Tlač ========== */
+@media print {
+    #adminmenumain, #wpadminbar, #wpfooter, .kass-noprint, .update-nag, #screen-meta, #screen-meta-links { display: none !important; }
+    .fa4-placeholder .fa4-ph-btn { visibility: hidden; }
+    .fa4-placeholder .fa4-ph-cell { min-height: 80px !important; height: 80px !important; }
+    .fa4-item-r[style*="min-height"] { min-height: 80px !important; height: 80px !important; }
+    #wpcontent, #wpbody-content { margin: 0 !important; padding: 0 !important; }
+    .kass-faktura-wrap { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+    .kass-a4 { box-shadow: none !important; margin: 0 !important; width: 100% !important; padding: 6mm 10mm 6mm 10mm !important; }
+    @page { size: A4 portrait; margin: 12mm; }
+}

@@ -1,0 +1,475 @@
+/* ===== POZADIE NA CELÚ VÝŠKU STRÁNKY ===== */
+html, body {
+    min-height: 100% !important;
+    background-color: inherit;
+}
+/* Avada theme — zabezpeč tmavé pozadie na celú výšku */
+body .fusion-page-wrapper,
+body #wrapper,
+body .fusion-sides-frame,
+body #main,
+body .post-content {
+    min-height: 100vh;
+}
+
+/* ===== WRAPPER ===== */
+.kp-fullwidth {
+    box-sizing: border-box;
+    padding-bottom: 60px;
+}
+.kp-app {
+    max-width: none !important;
+    overflow: visible;
+    position: relative;
+}
+
+/* ===== LOGIN ===== */
+.kp-login-wrap {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 50vh; padding: 24px;
+}
+.kp-login-box {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    backdrop-filter: blur(10px);
+    border-radius: 14px; padding: 36px 32px;
+    width: 100%; max-width: 380px;
+}
+.kp-login-logo { text-align: center; margin-bottom: 16px; }
+.kp-login-title { font-size: 20px; font-weight: 700; text-align: center; margin: 0 0 4px; color: #fff; }
+.kp-login-sub   { font-size: 13px; color: rgba(255,255,255,.55); text-align: center; margin: 0 0 22px; }
+.kp-error { background: rgba(220,38,38,.2); border: 1px solid rgba(220,38,38,.5); color: #fca5a5; border-radius: 7px; padding: 9px 13px; font-size: 13px; margin-bottom: 14px; }
+.kp-field { margin-bottom: 14px; }
+.kp-field label { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .06em; }
+.kp-field input {
+    width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: 14px;
+    border: 1.5px solid rgba(255,255,255,.2); border-radius: 7px; outline: none;
+    background: rgba(255,255,255,.08); color: #fff;
+}
+.kp-field input::placeholder { color: rgba(255,255,255,.35); }
+.kp-field input:focus { border-color: rgba(255,255,255,.5); background: rgba(255,255,255,.12); }
+.kp-field-check { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; font-size: 13px; color: rgba(255,255,255,.6); cursor: pointer; }
+.kp-field-check input { width: auto; }
+.kp-btn-login {
+    width: 100%; padding: 11px; background: #c0392b; color: #fff;
+    font-size: 15px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer;
+}
+.kp-btn-login:hover { background: #a93226; }
+
+/* ===== APP SHELL ===== */
+.kp-app { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #f1f1f1; }
+
+/* Hlavička — transparentná, vychádza z témy */
+.kp-header {
+    background: rgba(0,0,0,.45);
+    border: 1px solid rgba(255,255,255,.08);
+    backdrop-filter: blur(8px);
+    border-radius: 10px; padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px; gap: 10px; flex-wrap: wrap;
+}
+.kp-header-left  { display: flex; align-items: center; gap: 10px; }
+.kp-header-title { font-size: 15px; font-weight: 700; color: #fff; }
+.kp-header-sub   { font-size: 11px; color: rgba(255,255,255,.5); }
+.kp-header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.kp-sel-rok {
+    font-size: 13px; padding: 4px 8px; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.1); color: #fff;
+}
+.kp-sel-rok option { color: #111; background: #fff; }
+.kp-username { font-size: 13px; color: rgba(255,255,255,.7); }
+.kp-logout {
+    font-size: 12px; color: rgba(255,255,255,.6);
+    border: 1px solid rgba(255,255,255,.25); border-radius: 20px; padding: 3px 11px; text-decoration: none;
+}
+.kp-logout:hover { color: #fff; border-color: rgba(255,255,255,.6); }
+
+/* Toolbar */
+.kp-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 10px; flex-wrap: wrap; }
+.kp-toolbar-left  { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.kp-toolbar-right { display: flex; align-items: center; gap: 10px; }
+.kp-btn-add {
+    background: #c0392b; color: #fff; border: none;
+    padding: 8px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.kp-btn-add:hover { background: #a93226; }
+.kp-btn-print {
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+    border-radius: 7px; padding: 7px 14px; font-size: 13px; cursor: pointer; color: #e5e7eb; font-weight: 600;
+}
+.kp-btn-print:hover { background: rgba(255,255,255,.18); }
+.kp-status { font-size: 12px; font-weight: 600; }
+.kp-ok  { color: #4ade80; }
+.kp-err { color: #f87171; }
+.kp-count { font-size: 12px; color: rgba(255,255,255,.5); }
+
+/* Filter */
+.kp-filter-wrap { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.kp-filter-label { font-size: 11px; color: rgba(255,255,255,.4); font-weight: 500; white-space: nowrap; }
+.kp-filter-sel {
+    font-size: 11px; padding: 2px 6px; height: 24px;
+    border: 1px solid rgba(255,255,255,.1); border-radius: 5px;
+    background: rgba(255,255,255,.05); color: rgba(255,255,255,.7);
+    min-width: 0; width: auto; outline: none; cursor: pointer;
+}
+.kp-filter-sel option { color: #111; background: #fff; }
+.kp-filter-sel:focus, .kp-filter-sel:hover { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #e5e7eb; }
+.kp-btn-clear {
+    font-size: 11px; padding: 3px 8px;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 5px; background: transparent;
+    color: rgba(255,255,255,.4); cursor: pointer;
+}
+.kp-btn-clear:hover { color: #fca5a5; border-color: rgba(220,38,38,.4); }
+
+/* ===== TABUĽKA ===== */
+.kp-table-wrap {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: calc(100vh - 220px);
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.4);
+    border: 1px solid rgba(255,255,255,.08);
+}
+.kp-table { width: 100%; border-collapse: collapse; background: rgba(15,15,15,.85); table-layout: auto; }
+
+.kp-table thead th {
+    background: rgba(0,0,0,.85);
+    color: rgba(255,255,255,.85);
+    padding: 9px 6px;
+    font-size: 11px; font-weight: 700; white-space: nowrap;
+    text-transform: uppercase; letter-spacing: .04em;
+    border-right: 1px solid rgba(255,255,255,.06);
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.kp-table thead th:last-child { border-right: none; }
+
+/* Šírky */
+.kp-th-num   { width: 28px; }
+.kp-th-platba{ width: 50px; }
+.kp-th-fmt   { width: 36px; }
+.kp-th-org   { width: 140px; }
+.kp-th-akcia { width: 200px; }
+.kp-th-date  { width: 52px; }
+
+/* Krátky formát dátumu dd.mm */
+.kp-date-cell { position: relative; min-width: 46px; text-align: center; }
+.kp-date-txt {
+    display: inline-block; cursor: pointer; font-size: 12px;
+    color: #d1d5db; padding: 4px 4px; border-radius: 5px;
+    border: 1px solid transparent; white-space: nowrap;
+}
+.kp-date-txt.kp-date-empty { font-size: 16px; opacity: .35; }
+.kp-date-txt:hover { background: rgba(255,255,255,.06); }
+.kp-date-real {
+    position: absolute; opacity: 0; pointer-events: none;
+    width: 1px; height: 1px; top: 0; left: 0;
+}
+.kp-th-sm    { width: 52px; }
+.kp-th-num2  { width: 72px; }
+.kp-th-note  { width: 100px; }
+.kp-th-act   { width: 76px; }
+
+/* Riadky */
+.kp-row td {
+    padding: 5px 5px;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    vertical-align: middle;
+    color: #e5e7eb;
+    background: rgba(255,255,255,.06);
+}
+.kp-row:hover td { background: rgba(255,255,255,.11) !important; }
+.kp-row-new td   { background: rgba(192,57,43,.1) !important; }
+.kp-row.kp-saving { opacity: .6; pointer-events: none; }
+
+.kp-num  { text-align: center; color: rgba(255,255,255,.3); font-size: 11px; }
+.kp-num-edit {
+    display: inline-block; min-width: 14px; cursor: text;
+    outline: none; border-radius: 3px;
+}
+.kp-num-edit:hover, .kp-num-edit:focus {
+    color: #fff; background: rgba(255,255,255,.1);
+    padding: 0 2px;
+}
+.kp-calc { text-align: center; font-size: 12px; color: #d1d5db; }
+.kp-bold { font-weight: 700; color: #fff !important; text-align: center; }
+.kp-sum-label { text-align: right; font-weight: 700; padding: 8px 8px; color: #fff; }
+
+/* Oddeľovač týždňov */
+.kp-row.kp-week-sep td {
+    border-top: 1.5px solid rgba(192,57,43,.7) !important;
+}
+.kp-table tfoot td {
+    background: rgba(255,255,255,.07);
+    font-weight: 700; font-size: 12px;
+    padding: 7px 6px;
+    border-top: none;
+    color: #fff;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,.08);
+}
+/* Medzera 10px medzi tbody a tfoot */
+.kp-table tbody tr:last-child td {
+    border-bottom: none;
+}
+.kp-table tfoot { border-top: 10px solid transparent; }
+.kp-sum { text-align: center; }
+/* Sticky súčtový riadok */
+.kp-table tfoot tr td {
+    position: sticky;
+    bottom: 0;
+    z-index: 9;
+    background: rgba(30,30,30,.98);
+}
+
+/* Inputy a selecty */
+.kp-inp, .kp-sel {
+    width: 100%; box-sizing: border-box;
+    border: 1px solid transparent; border-radius: 5px;
+    padding: 4px 5px; font-size: 12px; font-family: inherit;
+    background: transparent; color: #e5e7eb !important; outline: none;
+}
+.kp-inp::placeholder { color: rgba(255,255,255,.2); }
+.kp-sel option { color: #111; background: #fff; }
+.kp-inp:hover, .kp-sel:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.06); }
+.kp-inp:focus, .kp-sel:focus {
+    border-color: rgba(192,57,43,.7);
+    background: rgba(255,255,255,.08);
+    color: #fff !important;
+    box-shadow: 0 0 0 2px rgba(192,57,43,.2);
+}
+input[type="date"].kp-inp { font-size: 11px; color-scheme: dark; }
+input[type="number"].kp-inp { text-align: center; }
+/* Tlač, Iné, Poznámka — centrovanie */
+.kp-tlac, .kp-ine { text-align: center !important; }
+/* ===== FLATPICKR — úprava dark témy ===== */
+.flatpickr-calendar.dark { border: 1px solid rgba(255,255,255,.15); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+.flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover { opacity: .15; cursor: not-allowed; }
+.flatpickr-day.selected, .flatpickr-day.selected:hover { background: #c0392b; border-color: #c0392b; }
+.flatpickr-day:hover:not(.flatpickr-disabled) { background: rgba(192,57,43,.25); }
+.kp-row td input[type="number"]::-webkit-outer-spin-button,
+.kp-row td input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.kp-row td input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+/* ===== AUTOCOMPLETE ===== */
+.kp-ac-wrap { position: relative; }
+.kp-ac-wrap .kp-ac-input {
+    background: transparent !important;
+    border-color: transparent !important;
+    color: #e5e7eb !important;
+}
+
+/* Univerzálny override — všetky inputy v riadkoch */
+.kp-row td input,
+.kp-row td select,
+.kp-row td textarea {
+    background: transparent !important;
+    color: #e5e7eb !important;
+    -webkit-text-fill-color: #e5e7eb !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+/* Placeholder — jemná šedá */
+.kp-row td input::placeholder,
+.kp-row td textarea::placeholder {
+    color: rgba(255,255,255,.22) !important;
+    -webkit-text-fill-color: rgba(255,255,255,.22) !important;
+}
+/* Focus — zvýrazni okraj bunky */
+.kp-row td input:focus,
+.kp-row td select:focus,
+.kp-row td textarea:focus {
+    background: rgba(255,255,255,.06) !important;
+    border-radius: 4px;
+    -webkit-text-fill-color: #fff !important;
+    color: #fff !important;
+}
+.kp-ac-drop {
+    position: absolute; top: calc(100% + 2px); left: 0; right: 0; z-index: 200;
+    background: #1c1c1c; border: 1px solid rgba(255,255,255,.15); border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.5); max-height: 220px; overflow-y: auto; min-width: 200px;
+}
+.kp-ac-item { padding: 8px 12px; font-size: 12px; cursor: pointer; color: #e5e7eb; border-bottom: 1px solid rgba(255,255,255,.06); }
+.kp-ac-item:last-child { border-bottom: none; }
+.kp-ac-item:hover, .kp-ac-item:focus { background: rgba(255,255,255,.08); outline: none; }
+.kp-ac-new { color: #fca5a5; background: rgba(192,57,43,.15); }
+.kp-ac-new:hover { background: rgba(192,57,43,.25); }
+
+/* ===== AKCIE ===== */
+.kp-actions { white-space: nowrap; text-align: center; }
+.kp-btn-save, .kp-btn-del, .kp-btn-fakt {
+    border: none; background: none; cursor: pointer;
+    font-size: 14px; padding: 3px 4px; border-radius: 5px; line-height: 1;
+    text-decoration: none; display: inline-block;
+}
+.kp-btn-save:hover  { background: rgba(74,222,128,.15); }
+.kp-btn-fakt:hover  { background: rgba(96,165,250,.15); }
+.kp-btn-del         { font-size: 12px; color: #f87171; }
+.kp-btn-del:hover   { background: rgba(248,113,113,.15); }
+
+/* ===== TLAČ ===== */
+@media print {
+    html, body { background: #fff !important; color: #000 !important; }
+    .kp-header, .kp-toolbar, .kp-actions, .kp-logout { display: none !important; }
+    .kp-fullwidth { padding: 0 !important; }
+    .kp-table-wrap { overflow: visible; box-shadow: none; border: none; border-radius: 0; }
+    .kp-table { background: #fff !important; font-size: 8pt; }
+    .kp-table thead th { background: #1a1a1a !important; color: #fff !important; font-size: 7.5pt; padding: 4px 3px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .kp-row td { color: #000 !important; padding: 3px; border-bottom: 1px solid #ddd; }
+    .kp-table tfoot td { background: #f3f4f6 !important; color: #000 !important; border-top: 2px solid #999 !important; }
+    .kp-inp, .kp-sel { border: none; background: transparent; color: #000 !important; }
+    .kp-ac-drop { display: none !important; }
+    @page { size: A3 landscape; margin: 8mm; }
+}
+
+/* ===== PLATBA DROPDOWN ===== */
+.kp-platba-wrap { position: relative; display: inline-block; width: 100%; }
+.kp-platba-btn {
+    width: 100%; text-align: center; cursor: pointer; font-size: 12px;
+    font-weight: 700; padding: 4px 5px; border-radius: 5px;
+    border: 1px solid transparent; color: #e5e7eb;
+    background: transparent; user-select: none;
+}
+.kp-platba-btn:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.06); }
+.kp-platba-btn[data-val="FA"]  { color: #60a5fa; }
+.kp-platba-btn[data-val="H"]   { color: #4ade80; }
+.kp-platba-btn[data-val="K"]   { color: #f59e0b; }
+.kp-platba-btn[data-val="Z"]   { color: #94a3b8; }
+.kp-platba-drop {
+    display: none; position: fixed;
+    z-index: 9999; background: #1c1c1c;
+    border: 1px solid rgba(255,255,255,.15); border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.5); min-width: 120px; overflow: hidden;
+}
+.kp-platba-drop.open { display: block; }
+.kp-platba-opt {
+    padding: 8px 14px; font-size: 12px; cursor: pointer;
+    color: #e5e7eb; border-bottom: 1px solid rgba(255,255,255,.06);
+    display: flex; align-items: center; gap: 8px;
+}
+.kp-platba-opt:last-child { border-bottom: none; }
+.kp-platba-opt:hover { background: rgba(255,255,255,.08); }
+.kp-platba-skr { font-weight: 700; width: 22px; text-align: center; font-size: 11px; }
+.kp-platba-opt[data-val="FA"] .kp-platba-skr { color: #60a5fa; }
+.kp-platba-opt[data-val="H"]  .kp-platba-skr { color: #4ade80; }
+.kp-platba-opt[data-val="K"]  .kp-platba-skr { color: #f59e0b; }
+.kp-platba-opt[data-val="Z"]  .kp-platba-skr { color: #94a3b8; }
+
+/* ===== FAKTURA MODAL ===== */
+.kp-modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 99999;
+    background: rgba(0,0,0,.65); backdrop-filter: blur(3px);
+    align-items: center; justify-content: center;
+}
+.kp-modal-overlay.open { display: flex; }
+.kp-modal-box {
+    background: #fff; border-radius: 10px;
+    width: 90vw; max-width: 900px; height: 90vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    overflow: hidden;
+}
+.kp-modal-bar {
+    display: flex; align-items: center; justify-content: flex-end;
+    padding: 6px 10px; background: #1a1a1a; flex-shrink: 0;
+}
+.kp-modal-title { color: #fff; font-size: 14px; font-weight: 600; }
+.kp-modal-actions { display: flex; gap: 8px; align-items: center; }
+.kp-modal-print {
+    background: #2563eb; color: #fff; border: none;
+    padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+}
+.kp-modal-print:hover { background: #1d4ed8; }
+.kp-modal-close {
+    background: rgba(255,255,255,.1); color: #fff; border: none;
+    padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 16px;
+}
+.kp-modal-close:hover { background: rgba(255,255,255,.2); }
+.kp-modal-iframe {
+    flex: 1; border: none; width: 100%; background: #2a2a2a;
+}
+
+/* ===== TLAČ MODAL ===== */
+.kp-tlac-modal {
+    display: none; position: fixed; inset: 0; z-index: 99998;
+    background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
+    align-items: center; justify-content: center;
+}
+.kp-tlac-modal.open { display: flex; }
+.kp-tlac-box {
+    background: #1e1e1e; border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px; padding: 22px 24px; width: 340px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6);
+}
+.kp-tlac-box h3 { margin: 0 0 16px; font-size: 15px; color: #fff; font-weight: 700; }
+.kp-tlac-field { margin-bottom: 12px; }
+.kp-tlac-field label { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+.kp-tlac-field select, .kp-tlac-field input[type="number"] {
+    width: 100%; box-sizing: border-box; padding: 7px 10px; border-radius: 7px;
+    border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.07);
+    color: #e5e7eb; font-size: 13px; outline: none;
+}
+.kp-tlac-field select option { background: #1e1e1e; color: #e5e7eb; }
+.kp-tlac-field input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+.kp-tlac-field input[type="number"]::-webkit-outer-spin-button,
+.kp-tlac-field input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+.kp-tlac-result {
+    background: rgba(255,255,255,.06); border-radius: 8px; padding: 10px 12px;
+    margin: 14px 0; display: flex; justify-content: space-between; align-items: center;
+}
+.kp-tlac-result-lbl { font-size: 12px; color: rgba(255,255,255,.6); }
+.kp-tlac-result-val { font-size: 16px; font-weight: 700; color: #fff; }
+.kp-tlac-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+.kp-tlac-cancel { background: rgba(255,255,255,.08); color: #e5e7eb; border: none; padding: 8px 16px; border-radius: 7px; cursor: pointer; font-size: 13px; }
+.kp-tlac-confirm { background: #c0392b; color: #fff; border: none; padding: 8px 18px; border-radius: 7px; cursor: pointer; font-size: 13px; font-weight: 600; }
+.kp-tlac-confirm:hover { background: #a93226; }
+
+/* Tlač modal — aktualizácia */
+.kp-tlac-line { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.kp-tlac-line select { flex: 1; padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.07); color: #e5e7eb; font-size: 12px; outline: none; }
+.kp-tlac-line select option { background: #1e1e1e; }
+.kp-tlac-line input { width: 52px; padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.07); color: #e5e7eb; font-size: 12px; outline: none; text-align: center; -moz-appearance: textfield; }
+.kp-tlac-line input::-webkit-outer-spin-button, .kp-tlac-line input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.kp-tlac-line-lbl { font-size: 11px; color: rgba(255,255,255,.45); min-width: 48px; text-align: right; white-space: nowrap; }
+.kp-tlac-line-del { background: none; border: none; color: rgba(255,255,255,.3); cursor: pointer; font-size: 14px; padding: 2px 4px; }
+.kp-tlac-line-del:hover { color: #f87171; }
+.kp-tlac-add-line { width: 100%; background: rgba(255,255,255,.05); border: 1px dashed rgba(255,255,255,.15); color: rgba(255,255,255,.5); border-radius: 7px; padding: 6px; font-size: 12px; cursor: pointer; margin-bottom: 10px; }
+.kp-tlac-add-line:hover { background: rgba(255,255,255,.09); color: #e5e7eb; }
+.kp-tlac-clear { background: rgba(248,113,113,.12); color: #f87171; border: 1px solid rgba(248,113,113,.3); padding: 8px 14px; border-radius: 7px; cursor: pointer; font-size: 12px; margin-right: auto; }
+.kp-tlac-clear:hover { background: rgba(248,113,113,.2); }
+
+/* ===== FORMAT DROPDOWN (rovnaký štýl ako platba) ===== */
+.kp-fmt-wrap { position: relative; display: inline-block; width: 100%; }
+.kp-fmt-btn {
+    width: 100%; text-align: center; cursor: pointer; font-size: 12px;
+    font-weight: 700; padding: 4px 5px; border-radius: 5px;
+    border: 1px solid transparent; color: #e5e7eb;
+    background: transparent; user-select: none;
+}
+.kp-fmt-btn:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.06); }
+.kp-fmt-drop {
+    display: none; position: fixed;
+    z-index: 9999; background: #1c1c1c;
+    border: 1px solid rgba(255,255,255,.15); border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.5); min-width: 60px; overflow: hidden;
+}
+.kp-fmt-drop.open { display: block; }
+.kp-fmt-opt {
+    padding: 8px 14px; font-size: 12px; font-weight: 700; cursor: pointer;
+    color: #e5e7eb; border-bottom: 1px solid rgba(255,255,255,.06); text-align: center;
+}
+.kp-fmt-opt:last-child { border-bottom: none; }
+.kp-fmt-opt:hover { background: rgba(255,255,255,.08); }
+
+.kp-btn-vylep-list {
+    background: rgba(255,255,255,.1) !important; border: 1px solid rgba(255,255,255,.2) !important;
+    border-radius: 7px !important; padding: 7px 14px !important; font-size: 13px !important;
+    cursor: pointer !important; color: #e5e7eb !important; font-weight: 600 !important;
+    margin-right: 0 !important; box-shadow: none !important; text-shadow: none !important;
+    outline: none !important;
+}
+.kp-btn-vylep-list:hover { background: rgba(255,255,255,.18) !important; }
