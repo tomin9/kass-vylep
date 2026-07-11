@@ -815,7 +815,7 @@
             var bar = document.querySelector('.kp-sticky-top');
             if (!bar) { return; }
             var adminBar = document.getElementById('wpadminbar');
-            var offset = bar.offsetHeight + (adminBar ? adminBar.offsetHeight : 0) + 24;
+            var offset = bar.offsetHeight + (adminBar ? adminBar.offsetHeight : 0) + 12;
             document.documentElement.style.setProperty('--kp-sticky-offset', offset + 'px');
         }
         adjustStickyOffset();
