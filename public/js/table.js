@@ -779,57 +779,18 @@
             applyFilter();
         });
 
-        // Roztiahni na celú dostupnú šírku — 60px od kraja na oboch stranách
-        function adjustWidth() {
-            var $app = $('#kp-app');
-            if (!$app.length) { return; }
-
-            // Reset predchádzajúcich úprav
-            $app.css({ 'position': '', 'left': '', 'width': '' });
-
-            var margin       = 60;
-            var viewportW    = $(window).width();
-            var currentLeft  = $app.offset().left;
-
-            // Nájdi ľavý okraj content kontajnera (kde končí sidebar)
-            var $parent = $app.closest('.fusion-column-wrapper, .post-content, .entry-content, .fusion-text, #content');
-            var parentLeft = $parent.length ? $parent.offset().left : 0;
-
-            // O koľko posunúť doľava (od parentLeft + margin)
-            var shift    = currentLeft - parentLeft - margin;
-            var newWidth = viewportW - parentLeft - (2 * margin);
-
-            if (newWidth > 300) {
-                $app.css({
-                    'position': 'relative',
-                    'left': '-' + Math.max(0, shift) + 'px',
-                    'width': newWidth + 'px'
-                });
-            }
-        }
-        adjustWidth();
-        $(window).on('resize', adjustWidth);
-
-        // Výška tabuľky — odpočítaj reálnu výšku sticky panela a admin baru
-        function adjustStickyOffset() {
-            var bar = document.querySelector('.kp-sticky-top');
-            if (!bar) { return; }
-            var adminBar = document.getElementById('wpadminbar');
-            var offset = bar.offsetHeight + (adminBar ? adminBar.offsetHeight : 0) + 12;
-            document.documentElement.style.setProperty('--kp-sticky-offset', offset + 'px');
-        }
-        adjustStickyOffset();
-        $(window).on('resize', adjustStickyOffset);
-
-        // Zamkni rolovanie stránky aj cez JS (poistka pre prehliadače bez :has)
-        // a vráť stránku úplne hore — prehliadač si po reloade pamätá starý scroll
-        // a stránka by sa zamkla v odrolovanom stave (odrezaný prvý riadok).
+        // Aplikácia je position: fixed — presuň ju priamo pod <body>, aby jej
+        // pozíciu nemohol ovplyvniť žiadny wrapper témy (transform/filter mení
+        // referenčný bod fixed elementov). Zároveň zamkni rolovanie stránky.
         if (document.getElementById('kp-app')) {
+            var fw = document.querySelector('.kp-fullwidth');
+            if (fw && fw.parentNode !== document.body) {
+                document.body.appendChild(fw);
+            }
             if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
             document.documentElement.classList.add('kp-scroll-lock');
             document.body.classList.add('kp-scroll-lock');
             window.scrollTo(0, 0);
-            setTimeout(function () { window.scrollTo(0, 0); }, 100);
         }
 
         // Ukotvená hlavička stĺpcov — synchronizuj šírky s reálnou tabuľkou
@@ -846,7 +807,6 @@
                 dst[i].style.minWidth = w;
                 dst[i].style.maxWidth = w;
             }
-            adjustStickyOffset();
         }
         syncHeadWidths();
         $(window).on('resize', syncHeadWidths);
