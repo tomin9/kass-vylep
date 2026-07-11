@@ -53,7 +53,9 @@ body .fusion-text {
 /* Stránka s tabuľkou sa neroluje — scroluje sa len vnútro tabuľky.
    Box tabuľky sa tak nikdy neposunie a hlavička stĺpcov neujde. */
 html:has(#kp-app),
-body:has(#kp-app) {
+body:has(#kp-app),
+html.kp-scroll-lock,
+body.kp-scroll-lock {
     overflow: hidden !important;
     height: 100%;
 }
