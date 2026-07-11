@@ -802,17 +802,16 @@
                 ['wheel', 'touchstart', 'mousedown', 'keydown'].forEach(function (ev) {
                     window.addEventListener(ev, function () { userTouched = true; }, { passive: true, capture: true });
                 });
-                var guardEnd = Date.now() + 3000;
                 function pinBottom() { wrapEl.scrollTop = wrapEl.scrollHeight; }
                 function isAtBottom() { return wrapEl.scrollTop + wrapEl.clientHeight >= wrapEl.scrollHeight - 2; }
                 pinBottom();
+                // Bez časového limitu — kým sa používateľ sám nedotkne stránky,
+                // každý cudzí posun scrollu sa vráti na koniec. Prvý dotyk
+                // (koliesko/klik/dotyk/klávesa) strážcu natrvalo vypne.
                 wrapEl.addEventListener('scroll', function () {
-                    if (!userTouched && Date.now() < guardEnd && !isAtBottom()) {
-                        pinBottom();
-                    }
+                    if (!userTouched && !isAtBottom()) { pinBottom(); }
                 }, { passive: true });
                 window.addEventListener('load', function () {
-                    guardEnd = Date.now() + 3000; // predĺž strážcu od dokončenia načítania
                     if (!userTouched) { pinBottom(); }
                     setTimeout(function () { if (!userTouched) { pinBottom(); } }, 250);
                     setTimeout(function () { if (!userTouched) { pinBottom(); } }, 1000);
