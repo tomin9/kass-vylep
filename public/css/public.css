@@ -50,6 +50,13 @@ body .fusion-text {
     box-sizing: border-box;
     padding-bottom: 0;
 }
+/* Stránka s tabuľkou sa neroluje — scroluje sa len vnútro tabuľky.
+   Box tabuľky sa tak nikdy neposunie a hlavička stĺpcov neujde. */
+html:has(#kp-app),
+body:has(#kp-app) {
+    overflow: hidden !important;
+    height: 100%;
+}
 .kp-app {
     max-width: none !important;
     overflow: visible;
@@ -180,6 +187,7 @@ body.admin-bar .kp-sticky-top { top: 32px; }
     /* Vyplní presne zvyšok obrazovky — scroluje sa len vnútro tabuľky,
        takže hlavička stĺpcov (sticky top) a Spolu (sticky bottom) neodídu */
     height: calc(100vh - var(--kp-sticky-offset, 220px));
+    overscroll-behavior: contain;
     border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0,0,0,.4);
     border: 1px solid rgba(255,255,255,.08);

@@ -820,6 +820,15 @@
         }
         adjustStickyOffset();
         $(window).on('resize', adjustStickyOffset);
+
+        // Koliesko myši nad okrajmi stránky (mimo boxu tabuľky) scroluje dáta tabuľky
+        document.addEventListener('wheel', function (e) {
+            var wrap = document.querySelector('.kp-table-wrap');
+            if (!wrap) { return; }
+            if (wrap.contains(e.target)) { return; } // vnútri tabuľky funguje natívne
+            if (e.target.closest && e.target.closest('.kp-modal-overlay, .kp-tlac-modal, .kp-ac-drop, .kp-platba-drop, .kp-fmt-drop, .flatpickr-calendar')) { return; }
+            wrap.scrollTop += e.deltaY;
+        }, { passive: true });
     });
 
 })(jQuery);
