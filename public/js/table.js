@@ -52,6 +52,17 @@
             + '</div>';
     }
 
+    // Otvor fixne pozicovaný dropdown pod tlačidlom; ak dole nie je miesto, otoč ho nahor
+    function openFixedDrop($btn, $drop) {
+        var rect = $btn[0].getBoundingClientRect();
+        $drop.css({ top: '-9999px', left: rect.left + 'px' }).addClass('open');
+        var h = $drop.outerHeight();
+        var top = rect.bottom + 4;
+        if (top + h > window.innerHeight - 8) { top = rect.top - h - 4; }
+        if (top < 8) { top = 8; }
+        $drop.css('top', top + 'px');
+    }
+
     function getCena(fmt, tyzdne) {         // bez DPH — pre fakturáciu a ukladanie
         tyzdne = parseInt(tyzdne, 10) || 1;
         var v = CENNIK.vylep && CENNIK.vylep[fmt];
@@ -201,6 +212,11 @@
             $('<div class="kp-ac-item kp-ac-new"></div>').html('➕ Pridať: <strong>' + $('<span>').text(query).html() + '</strong>').data('new', query).appendTo($drop);
         }
         $drop.show();
+        // Ak pod bunkou nie je miesto (posledné riadky), otoč zoznam nahor
+        $drop.removeClass('kp-ac-up');
+        var rect = $wrap[0].getBoundingClientRect();
+        var h = $drop.outerHeight();
+        if (rect.bottom + h + 6 > window.innerHeight - 44) { $drop.addClass('kp-ac-up'); }
     }
 
     function acHide($wrap) { $wrap.find('.kp-ac-drop').hide(); }
@@ -523,10 +539,7 @@
             var $drop = $btn.siblings('.kp-fmt-drop');
             var wasOpen = $drop.hasClass('open');
             $('.kp-fmt-drop, .kp-platba-drop').removeClass('open');
-            if (!wasOpen) {
-                var rect = $btn[0].getBoundingClientRect();
-                $drop.css({ top: (rect.bottom + 4) + 'px', left: rect.left + 'px' }).addClass('open');
-            }
+            if (!wasOpen) { openFixedDrop($btn, $drop); }
         });
         $tbody.on('click', '.kp-fmt-opt', function (e) {
             e.stopPropagation();
@@ -547,10 +560,7 @@
             var $drop = $btn.siblings('.kp-platba-drop');
             var wasOpen = $drop.hasClass('open');
             $('.kp-platba-drop').removeClass('open');
-            if (!wasOpen) {
-                var rect = $btn[0].getBoundingClientRect();
-                $drop.css({ top: (rect.bottom + 4) + 'px', left: rect.left + 'px' }).addClass('open');
-            }
+            if (!wasOpen) { openFixedDrop($btn, $drop); }
         });
         // Výber možnosti
         $tbody.on('click', '.kp-platba-opt', function (e) {
