@@ -228,6 +228,7 @@ body.kp-scroll-lock {
     flex: 1 1 auto;
     min-height: 0;
     overscroll-behavior: contain;
+    overflow-anchor: none; /* prehliadač nesmie sám korigovať scroll pri zmenách obsahu */
     border-radius: 0 0 10px 10px;
     box-shadow: 0 4px 20px rgba(0,0,0,.4);
     border: 1px solid rgba(255,255,255,.08);

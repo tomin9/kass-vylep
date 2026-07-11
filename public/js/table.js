@@ -791,6 +791,17 @@
             document.documentElement.classList.add('kp-scroll-lock');
             document.body.classList.add('kp-scroll-lock');
             window.scrollTo(0, 0);
+
+            // Tabuľka musí štartovať navrchu — prehliadač vie po načítaní
+            // obnoviť starú scroll pozíciu kontajnera; pripni ju na 0.
+            var wrapEl = document.querySelector('.kp-table-wrap');
+            if (wrapEl) {
+                wrapEl.scrollTop = 0;
+                window.addEventListener('load', function () {
+                    wrapEl.scrollTop = 0;
+                    setTimeout(function () { wrapEl.scrollTop = 0; }, 250);
+                });
+            }
         }
 
         // Ukotvená hlavička stĺpcov — synchronizuj šírky s reálnou tabuľkou
