@@ -792,10 +792,10 @@
             document.body.classList.add('kp-scroll-lock');
             window.scrollTo(0, 0);
 
-            // Tabuľka musí štartovať navrchu — prehliadač aj skripty témy vedia
-            // scroll kontajnera po načítaní posunúť (rôzne neskoro). Strážca:
-            // kým sa používateľ sám nedotkne stránky, každý programový scroll
-            // v prvých sekundách po načítaní vráť na 0.
+            // Po načítaní zobraz KONIEC tabuľky (posledné záznamy) — poradie
+            // riadkov ostáva 1…n. Strážca: kým sa používateľ sám nedotkne
+            // stránky, drž scroll na spodku (prehliadač aj skripty témy ho
+            // vedia po načítaní svojvoľne posunúť, aj obsah mení výšku).
             var wrapEl = document.querySelector('.kp-table-wrap');
             if (wrapEl) {
                 var userTouched = false;
@@ -803,15 +803,19 @@
                     window.addEventListener(ev, function () { userTouched = true; }, { passive: true, capture: true });
                 });
                 var guardEnd = Date.now() + 3000;
-                wrapEl.scrollTop = 0;
+                function pinBottom() { wrapEl.scrollTop = wrapEl.scrollHeight; }
+                function isAtBottom() { return wrapEl.scrollTop + wrapEl.clientHeight >= wrapEl.scrollHeight - 2; }
+                pinBottom();
                 wrapEl.addEventListener('scroll', function () {
-                    if (!userTouched && Date.now() < guardEnd && wrapEl.scrollTop !== 0) {
-                        wrapEl.scrollTop = 0;
+                    if (!userTouched && Date.now() < guardEnd && !isAtBottom()) {
+                        pinBottom();
                     }
                 }, { passive: true });
                 window.addEventListener('load', function () {
                     guardEnd = Date.now() + 3000; // predĺž strážcu od dokončenia načítania
-                    if (!userTouched) { wrapEl.scrollTop = 0; }
+                    if (!userTouched) { pinBottom(); }
+                    setTimeout(function () { if (!userTouched) { pinBottom(); } }, 250);
+                    setTimeout(function () { if (!userTouched) { pinBottom(); } }, 1000);
                 });
             }
         }
