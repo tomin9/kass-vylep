@@ -399,6 +399,8 @@ input[type="number"].kp-inp { text-align: center; }
     background: #1c1c1c; border: 1px solid rgba(255,255,255,.15); border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0,0,0,.5); max-height: 220px; overflow-y: auto; min-width: 200px;
 }
+/* Pri posledných riadkoch sa zoznam otvára nahor */
+.kp-ac-drop.kp-ac-up { top: auto; bottom: calc(100% + 2px); }
 .kp-ac-item { padding: 8px 12px; font-size: 12px; cursor: pointer; color: #e5e7eb; border-bottom: 1px solid rgba(255,255,255,.06); }
 .kp-ac-item:last-child { border-bottom: none; }
 .kp-ac-item:hover, .kp-ac-item:focus { background: rgba(255,255,255,.08); outline: none; }
