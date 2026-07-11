@@ -12,6 +12,30 @@ body .post-content {
     min-height: 100vh;
 }
 
+/* ===== ODSTRÁNENIE MEDZERY NAD APLIKÁCIOU (Avada) ===== */
+body .fusion-page-title-bar { display: none !important; }
+body #content .entry-title,
+body .fusion-post-title { display: none !important; }
+body #main { padding-top: 0 !important; }
+body #main > .fusion-row { padding-top: 0 !important; }
+body .post-content > .fusion-fullwidth:first-child {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* position: sticky nefunguje, ak má niektorý rodič overflow: hidden */
+body #wrapper,
+body #main,
+body .fusion-row,
+body .post-content,
+body .fusion-fullwidth,
+body .fusion-builder-row,
+body .fusion-layout-column,
+body .fusion-column-wrapper,
+body .fusion-text {
+    overflow: visible !important;
+}
+
 /* ===== WRAPPER ===== */
 .kp-fullwidth {
     box-sizing: border-box;
@@ -58,6 +82,24 @@ body .post-content {
 
 /* ===== APP SHELL ===== */
 .kp-app { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #f1f1f1; }
+
+/* ===== STICKY HORNÝ PANEL (hlavička + toolbar) ===== */
+.kp-sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    background: rgba(18,18,18,.94);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 10px 0;
+    margin-bottom: 2px;
+}
+/* Odsadenie pod WP admin bar */
+body.admin-bar .kp-sticky-top { top: 32px; }
+@media screen and (max-width: 782px) {
+    body.admin-bar .kp-sticky-top { top: 46px; }
+}
+.kp-sticky-top .kp-toolbar { margin-bottom: 0; }
 
 /* Hlavička — transparentná, vychádza z témy */
 .kp-header {
@@ -126,7 +168,7 @@ body .post-content {
 .kp-table-wrap {
     overflow-x: auto;
     overflow-y: auto;
-    max-height: calc(100vh - 220px);
+    max-height: calc(100vh - var(--kp-sticky-offset, 220px));
     border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0,0,0,.4);
     border: 1px solid rgba(255,255,255,.08);
@@ -314,7 +356,7 @@ input[type="number"].kp-inp { text-align: center; }
 /* ===== TLAČ ===== */
 @media print {
     html, body { background: #fff !important; color: #000 !important; }
-    .kp-header, .kp-toolbar, .kp-actions, .kp-logout { display: none !important; }
+    .kp-sticky-top, .kp-header, .kp-toolbar, .kp-actions, .kp-logout { display: none !important; }
     .kp-fullwidth { padding: 0 !important; }
     .kp-table-wrap { overflow: visible; box-shadow: none; border: none; border-radius: 0; }
     .kp-table { background: #fff !important; font-size: 8pt; }
