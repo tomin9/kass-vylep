@@ -809,6 +809,17 @@
         }
         adjustWidth();
         $(window).on('resize', adjustWidth);
+
+        // Výška tabuľky — odpočítaj reálnu výšku sticky panela a admin baru
+        function adjustStickyOffset() {
+            var bar = document.querySelector('.kp-sticky-top');
+            if (!bar) { return; }
+            var adminBar = document.getElementById('wpadminbar');
+            var offset = bar.offsetHeight + (adminBar ? adminBar.offsetHeight : 0) + 24;
+            document.documentElement.style.setProperty('--kp-sticky-offset', offset + 'px');
+        }
+        adjustStickyOffset();
+        $(window).on('resize', adjustStickyOffset);
     });
 
 })(jQuery);

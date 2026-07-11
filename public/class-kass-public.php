@@ -169,6 +169,9 @@ class KASS_Vylep_Public {
         <div class="kp-fullwidth">
         <div class="kp-app" id="kp-app">
 
+            <!-- Sticky horný panel: hlavička + toolbar -->
+            <div class="kp-sticky-top">
+
             <!-- Hlavička -->
             <div class="kp-header">
                 <div class="kp-header-left">
@@ -235,6 +238,8 @@ class KASS_Vylep_Public {
                     <button class="kp-btn-print" onclick="window.print()" type="button">🖨 Tlačiť</button>
                 </div>
             </div>
+
+            </div><!-- .kp-sticky-top -->
 
             <!-- Tabuľka -->
             <div class="kp-table-wrap">
