@@ -103,7 +103,8 @@
                 kusy:  data.kusy  || 1,
                 cena:  (data.cena != null) ? data.cena : null,
                 od:    data.od    || '',
-                do:    data.do    || ''
+                do:    data.do    || '',
+                manual: !!data.manual // pevná cena (napr. položka Tlač) — nepočíta sa z cenníka výlepu
             });
             render();
         }
@@ -132,7 +133,7 @@
                 var $rf = $('<div class="fa4-row"></div>').append('<b>Formát / počet kusov:</b>');
                 var $sf = $('<select class="faf-sel faf-hidden-sel" style="display:none;"></select>');
                 F.formaty.forEach(function (f) { $('<option>').text(f).prop('selected', f === r.fmt).appendTo($sf); });
-                $sf.on('change', function () { r.fmt = this.value; r.cena = cenaZCennika(r.fmt, r.oi); render(); });
+                $sf.on('change', function () { r.fmt = this.value; if (!r.manual) { r.cena = cenaZCennika(r.fmt, r.oi); } render(); });
                 var $kus = $('<input type="number" min="1" style="width:40px;display:none;" class="faf">').val(r.kusy).on('change', function () {
                     r.kusy = Math.max(1, parseInt(this.value, 10) || 1); render();
                 });
@@ -171,7 +172,7 @@
                 function commitDates() {
                     r.od = $odI.val(); r.do = $doI.val();
                     r.oi = parseInt($soI.val(), 10);
-                    r.cena = cenaZCennika(r.fmt, r.oi);
+                    if (!r.manual) { r.cena = cenaZCennika(r.fmt, r.oi); }
                     $vTxt.html(formatDatumVylep(r.od, r.do, r.oi)).show();
                     $odI.hide(); $doI.hide(); $soI.hide();
                     prepocitaj();

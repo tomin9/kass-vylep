@@ -29,6 +29,35 @@ foreach ( $organizacie as $o ) {
     );
 }
 $cennik_js = KASS_Vylep_Cennik::get_js_matrix();
+
+// Položky pre podklad k fakturácii: výlep + prípadná samostatná položka Tlač
+$polozky_js = array();
+foreach ( $polozky_init as $v ) {
+    $polozky_js[] = array(
+        'popis'     => $v->nazov_akcie,
+        'fmt'       => $v->format,
+        'oi'        => max( 0, (int) $v->tyzdne - 1 ),
+        'kusy'      => (int) $v->kusy,
+        'cena'      => (float) $v->cennik_cena,
+        'od'        => $v->datum_od,
+        'do'        => $v->datum_do,
+        'org_nazov' => $v->organizacia_nazov,
+    );
+    $tlac = (float) ( $v->tlac ?? 0 );
+    if ( $tlac > 0 ) {
+        $polozky_js[] = array(
+            'popis'     => 'Tlač – ' . $v->nazov_akcie,
+            'fmt'       => $v->format,
+            'oi'        => 0,
+            'kusy'      => 1,
+            'cena'      => $tlac,
+            'od'        => $v->datum_od,
+            'do'        => $v->datum_do,
+            'org_nazov' => $v->organizacia_nazov,
+            'manual'    => true, // cena je pevná suma z tlačovej kalkulačky — neprepočítavať z cenníka výlepu
+        );
+    }
+}
 ?>
 <div class="wrap kass-wrap kass-faktura-wrap">
 <h1 class="kass-noprint" style="<?php echo ! empty( $_GET['embed'] ) ? 'display:none;' : ''; ?>">Podklad k fakturácii</h1>
@@ -162,18 +191,7 @@ window.KASSFakt = {
     cennik: <?php echo wp_json_encode( $cennik_js ); ?>,
     obdobia: ["1 týždeň","2 týždne","3 týždne","4 týždne","5 týždňov"],
     formaty: ["A4","A3","A2","A1"],
-    init: <?php echo wp_json_encode( array_map( function( $v ) {
-        return array(
-            'popis'     => $v->nazov_akcie,
-            'fmt'       => $v->format,
-            'oi'        => max( 0, (int) $v->tyzdne - 1 ),
-            'kusy'      => (int) $v->kusy,
-            'cena'      => (float) $v->cennik_cena,
-            'od'        => $v->datum_od,
-            'do'        => $v->datum_do,
-            'org_nazov' => $v->organizacia_nazov,
-        );
-    }, $polozky_init ) ); ?>,
+    init: <?php echo wp_json_encode( $polozky_js ); ?>,
     predvybrany: <?php echo (int) $predvybrany_org; ?>
 };
 </script>
