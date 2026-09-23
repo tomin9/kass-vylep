@@ -6,6 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  */
 class KASS_Vylep_Cennik {
 
+    /** Koeficient prepočtu bez DPH → s DPH, použitý konzistentne v celom cenníku. */
+    const DPH = 1.23;
+
     /**
      * Kompletný katalóg.
      * Pole položiek: kod, kategoria, format, popis, tyzdne, bez_dph, s_dph
@@ -42,12 +45,12 @@ class KASS_Vylep_Cennik {
             array( 'kod' => 17, 'kategoria' => 'ostatne', 'format' => '', 'popis' => 'Grafické práce (€/h)', 'tyzdne' => 0, 'bez_dph' => 0, 's_dph' => 25.00 ),
 
             // ---- KOPÍROVANIE ----
-            array( 'kod' => 18, 'kategoria' => 'kopirovanie', 'format' => 'A4', 'popis' => 'ČB',             'tyzdne' => 0, 'bez_dph' => 0, 's_dph' => 0.15 ),
-            array( 'kod' => 19, 'kategoria' => 'kopirovanie', 'format' => 'A4', 'popis' => 'ČB obojstranne', 'tyzdne' => 0, 'bez_dph' => 0, 's_dph' => 0.30 ),
-            array( 'kod' => 20, 'kategoria' => 'kopirovanie', 'format' => 'A3', 'popis' => 'ČB',             'tyzdne' => 0, 'bez_dph' => 0, 's_dph' => 0.25 ),
-            array( 'kod' => 21, 'kategoria' => 'kopirovanie', 'format' => 'A3', 'popis' => 'ČB obojstranne', 'tyzdne' => 0, 'bez_dph' => 0, 's_dph' => 0.50 ),
-            array( 'kod' => 22, 'kategoria' => 'kopirovanie', 'format' => 'A4', 'popis' => 'Farebne',        'tyzdne' => 0, 'bez_dph' => 0, 's_dph' => 0.70 ),
-            array( 'kod' => 23, 'kategoria' => 'kopirovanie', 'format' => 'A3', 'popis' => 'Farebne',        'tyzdne' => 0, 'bez_dph' => 0, 's_dph' => 1.40 ),
+            array( 'kod' => 18, 'kategoria' => 'kopirovanie', 'format' => 'A4', 'popis' => 'ČB',             'tyzdne' => 0, 'bez_dph' => 0.1220, 's_dph' => 0.15 ),
+            array( 'kod' => 19, 'kategoria' => 'kopirovanie', 'format' => 'A4', 'popis' => 'ČB obojstranne', 'tyzdne' => 0, 'bez_dph' => 0.2439, 's_dph' => 0.30 ),
+            array( 'kod' => 20, 'kategoria' => 'kopirovanie', 'format' => 'A3', 'popis' => 'ČB',             'tyzdne' => 0, 'bez_dph' => 0.2033, 's_dph' => 0.25 ),
+            array( 'kod' => 21, 'kategoria' => 'kopirovanie', 'format' => 'A3', 'popis' => 'ČB obojstranne', 'tyzdne' => 0, 'bez_dph' => 0.4065, 's_dph' => 0.50 ),
+            array( 'kod' => 22, 'kategoria' => 'kopirovanie', 'format' => 'A4', 'popis' => 'Farebne',        'tyzdne' => 0, 'bez_dph' => 0.5691, 's_dph' => 0.70 ),
+            array( 'kod' => 23, 'kategoria' => 'kopirovanie', 'format' => 'A3', 'popis' => 'Farebne',        'tyzdne' => 0, 'bez_dph' => 1.1382, 's_dph' => 1.40 ),
             array( 'kod' => 24, 'kategoria' => 'kopirovanie', 'format' => '',   'popis' => 'Laminovanie A4', 'tyzdne' => 0, 'bez_dph' => 0, 's_dph' => 1.20 ),
             array( 'kod' => 38, 'kategoria' => 'kopirovanie', 'format' => '',   'popis' => 'Prenájom plochy', 'tyzdne' => 0, 'bez_dph' => 0, 's_dph' => 17.00 ),
             array( 'kod' => 39, 'kategoria' => 'kopirovanie', 'format' => '',   'popis' => 'Prenájom plochy', 'tyzdne' => 0, 'bez_dph' => 0, 's_dph' => 68.00 ),
@@ -150,6 +153,51 @@ class KASS_Vylep_Cennik {
             $kategoria, $format, $ty
         ) );
         return $row ? (float) $row->cena_bez_dph : 0;
+    }
+
+    /**
+     * Cenník tlače (kategória "kopirovanie") pre tlačovú kalkulačku vo výlepovej
+     * tabuľke — [formát][typ] => {bez, s}. Typ: cb | cb2 | far.
+     */
+    public static function get_tlac_matrix() {
+        $typ_map = array(
+            'ČB'             => 'cb',
+            'ČB obojstranne' => 'cb2',
+            'Farebne'        => 'far',
+        );
+        $m = array();
+        foreach ( self::by_kategoria( 'kopirovanie' ) as $r ) {
+            if ( ! isset( $typ_map[ $r->popis ] ) || ! in_array( $r->format, array( 'A4', 'A3' ), true ) ) { continue; }
+            $m[ $r->format ][ $typ_map[ $r->popis ] ] = array(
+                'bez' => (float) $r->cena_bez_dph,
+                's'   => (float) $r->cena_s_dph,
+            );
+        }
+        return $m;
+    }
+
+    /**
+     * Migrácia: doplní cenu bez DPH pre položky tlače (kód 18–23), ktoré ju
+     * z pôvodného seedu nemali vyplnenú (bola 0). Nedotkne sa riadkov, ktoré
+     * admin už ručne upravil v cenníku (tam už bez DPH nie je 0).
+     */
+    public static function fix_kopirovanie_bez_dph() {
+        global $wpdb;
+        $t = KASS_Vylep_DB::t_cennik();
+        $fixes = array(
+            18 => 0.1220,
+            19 => 0.2439,
+            20 => 0.2033,
+            21 => 0.4065,
+            22 => 0.5691,
+            23 => 1.1382,
+        );
+        foreach ( $fixes as $kod => $bez ) {
+            $wpdb->query( $wpdb->prepare(
+                "UPDATE $t SET cena_bez_dph = %f WHERE kod = %d AND cena_bez_dph = 0",
+                $bez, $kod
+            ) );
+        }
     }
 
     public static function get_js_matrix() {

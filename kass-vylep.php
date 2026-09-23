@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Výlep plagátov
  * Description: Evidencia výlepu plagátov, databáza odberateľov, cenník, generátor podkladu k fakturácii a týždenný zoznam plagátov, ktoré sa nesmú prelepiť.
- * Version: 1.4.5
+ * Version: 1.4.6
  * Author: OZ Ars Preuge
  * Text Domain: kass-vylep
  * Requires at least: 5.8
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; // priamy prístup zakázaný
 }
 
-define( 'KASS_VYLEP_VERSION', '1.4.5' );
+define( 'KASS_VYLEP_VERSION', '1.4.6' );
 define( 'KASS_VYLEP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'KASS_VYLEP_URL', plugin_dir_url( __FILE__ ) );
 
@@ -29,6 +29,7 @@ function kass_vylep_activate() {
     KASS_Vylep_DB::create_tables();
     KASS_Vylep_Cennik::migrate();
     KASS_Vylep_Cennik::seed_defaults();
+    KASS_Vylep_Cennik::fix_kopirovanie_bez_dph();
     update_option( 'kass_vylep_version', KASS_VYLEP_VERSION );
 }
 register_activation_hook( __FILE__, 'kass_vylep_activate' );
@@ -42,6 +43,7 @@ function kass_vylep_maybe_upgrade() {
         KASS_Vylep_DB::create_tables();
         KASS_Vylep_Cennik::migrate();
         KASS_Vylep_Cennik::seed_defaults();
+        KASS_Vylep_Cennik::fix_kopirovanie_bez_dph();
         update_option( 'kass_vylep_version', KASS_VYLEP_VERSION );
     }
 }

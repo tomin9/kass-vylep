@@ -43,15 +43,19 @@ foreach ( $polozky_init as $v ) {
         'do'        => $v->datum_do,
         'org_nazov' => $v->organizacia_nazov,
     );
-    $tlac = (float) ( $v->tlac ?? 0 );
-    if ( $tlac > 0 ) {
+    $tlac_bez = (float) ( $v->tlac_bez_dph ?? 0 );
+    if ( $tlac_bez <= 0 && (float) ( $v->tlac ?? 0 ) > 0 ) {
+        // Staršie záznamy uložené pred zavedením tlac_bez_dph — dopočítaj z ceny s DPH.
+        $tlac_bez = round( (float) $v->tlac / KASS_Vylep_Cennik::DPH, 4 );
+    }
+    if ( $tlac_bez > 0 ) {
         $tlac_kusy = max( 1, (int) $v->kusy ); // rovnaký počet kusov ako výlep
         $polozky_js[] = array(
             'popis'     => 'Tlač – ' . $v->nazov_akcie,
             'fmt'       => $v->format,
             'oi'        => 0,
             'kusy'      => $tlac_kusy,
-            'cena'      => round( $tlac / $tlac_kusy, 4 ), // cena za kus z celkovej sumy tlače
+            'cena'      => round( $tlac_bez / $tlac_kusy, 4 ), // cena za kus bez DPH z cenníka
             'od'        => $v->datum_od,
             'do'        => $v->datum_do,
             'org_nazov' => $v->organizacia_nazov,

@@ -336,6 +336,7 @@
             kusy:              $tr.find('.kp-kusy').val(),
             cennik_cena:       $tr.find('.kp-cena').val(),
             tlac:              String($tr.find('.kp-tlac').val()).replace(/\s*€/g, '').replace(',', '.'),
+            tlac_bez_dph:      $tr.find('.kp-tlac-bez').val() || 0,
             ine:               String($tr.find('.kp-ine').val()).replace(/\s*€/g, '').replace(',', '.'),
         };
 
@@ -499,7 +500,7 @@
             + '<td><input type="number" class="kp-inp kp-kusy" name="kusy" placeholder="ks" min="0"></td>'
             + '<td class="kp-calc"><span class="kp-cena-val">—</span><input type="hidden" class="kp-cena" value="0"></td>'
             + '<td class="kp-calc kp-bold"><span class="kp-vylep-val">—</span></td>'
-            + '<td><input type="text" class="kp-inp kp-tlac" placeholder="0"></td>'
+            + '<td><input type="text" class="kp-inp kp-tlac" placeholder="0"><input type="hidden" class="kp-tlac-bez" value="0"></td>'
             + '<td><input type="text" class="kp-inp kp-ine" placeholder="0"></td>'
             + '<td class="kp-calc"><span class="kp-hot-val">—</span></td>'
             + '<td class="kp-calc"><span class="kp-fak-val">—</span></td>'
@@ -620,7 +621,10 @@
         /* ===== TLAČ MODAL ===== */
         var $tlacModal = $('#kp-tlac-modal');
         var $tlacRow = null;
-        var tlacTC = KP.tlacCennik || { A4: {cb:0.15,cb2:0.30,far:0.70}, A3: {cb:0.25,cb2:0.50,far:1.40} };
+        var tlacTC = KP.tlacCennik || {
+            A4: { cb: { s: 0.15, bez: 0.1220 }, cb2: { s: 0.30, bez: 0.2439 }, far: { s: 0.70, bez: 0.5691 } },
+            A3: { cb: { s: 0.25, bez: 0.2033 }, cb2: { s: 0.50, bez: 0.4065 }, far: { s: 1.40, bez: 1.1382 } }
+        };
 
         function tlacLineHtml() {
             return '<div class="kp-tlac-line">'
@@ -633,18 +637,20 @@
         }
 
         function tlacRecalc() {
-            var total = 0;
+            var total = 0, totalBez = 0;
             $('#kp-tlac-lines .kp-tlac-line').each(function () {
                 var fmt   = $(this).find('.tl-fmt').val();
                 var typ   = $(this).find('.tl-typ').val();
                 var ks    = parseInt($(this).find('.tl-ks').val(), 10) || 1;
-                var cena  = tlacTC[fmt] && tlacTC[fmt][typ] ? tlacTC[fmt][typ] : 0;
-                var sub   = cena * ks;
+                var rate  = (tlacTC[fmt] && tlacTC[fmt][typ]) || { s: 0, bez: 0 };
+                var sub   = (rate.s   || 0) * ks;
+                var subBez = (rate.bez || 0) * ks;
                 $(this).find('.tl-suma').text(sub > 0 ? sub.toFixed(2).replace('.', ',') + ' €' : '0,00 €');
                 total += sub;
+                totalBez += subBez;
             });
             $('#kp-tlac-cena').text(total > 0 ? total.toFixed(2).replace('.', ',') + ' €' : '—');
-            return total;
+            return { s: total, bez: totalBez };
         }
 
         function tlacOpen($tr) {
@@ -689,24 +695,28 @@
             if ($tlacRow) {
                 $tlacRow.data('tlac-lines', null);
                 $tlacRow.find('.kp-tlac').val('');
+                $tlacRow.find('.kp-tlac-bez').val(0);
                 recalcRow($tlacRow);
                 recalcTotals();
+                scheduleSave($tlacRow);
             }
             $tlacModal.removeClass('open');
         });
 
         $('#kp-tlac-ok').on('click', function () {
             if (!$tlacRow) { return; }
-            var total = tlacRecalc();
+            var totals = tlacRecalc();
             var lines = [];
             $('#kp-tlac-lines .kp-tlac-line').each(function () {
                 lines.push({ fmt: $(this).find('.tl-fmt').val(), typ: $(this).find('.tl-typ').val(), ks: $(this).find('.tl-ks').val() });
             });
             $tlacRow.data('tlac-lines', lines);
-            var formatted = total > 0 ? total.toFixed(2).replace('.', ',') + ' €' : '';
+            var formatted = totals.s > 0 ? totals.s.toFixed(2).replace('.', ',') + ' €' : '';
             $tlacRow.find('.kp-tlac').val(formatted);
+            $tlacRow.find('.kp-tlac-bez').val(totals.bez.toFixed(2));
             recalcRow($tlacRow);
             recalcTotals();
+            scheduleSave($tlacRow);
             $tlacModal.removeClass('open');
         });
 
