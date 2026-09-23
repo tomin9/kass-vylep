@@ -104,7 +104,8 @@
                 cena:  (data.cena != null) ? data.cena : null,
                 od:    data.od    || '',
                 do:    data.do    || '',
-                manual: !!data.manual // pevná cena (napr. položka Tlač) — nepočíta sa z cenníka výlepu
+                manual: !!data.manual, // pevná cena (napr. položka Tlač) — nepočíta sa z cenníka výlepu
+                hasPeriod: data.hasPeriod !== false // false = bez obdobia výlepu (napr. položka Tlač)
             });
             render();
         }
@@ -147,7 +148,10 @@
                 $rf.append($txt, $sf, $('<span> / </span>').hide(), $kus, $('<span> ks</span>').hide());
 
                 // Výlep — plain text formát: dd.m. – dd.m. rrrr (n týždňov)
-                var $rv = $('<div class="fa4-row"></div>').append('<b>Výlep:</b>');
+                // Položky bez obdobia (napr. Tlač) tento riadok vôbec nemajú.
+                var $rv = null;
+                if (r.hasPeriod) {
+                $rv = $('<div class="fa4-row"></div>').append('<b>Výlep:</b>');
 
                 function formatDatumVylep(od, doo, oi) {
                     var tLabel = F.obdobia[oi] || (oi+1) + 'T';
@@ -183,13 +187,16 @@
                 $soI.on('change', commitDates);
 
                 $rv.append($vTxt, $odI, $(' – '), $doI, $soI);
+                } // if (r.hasPeriod)
 
                 // Výpočet — plain text, no bold, aligned
                 var $rc = $('<div class="fa4-row" style="margin-bottom:0;"></div>').append('<b>Výpočet:</b>');
                 $rc.append(
                     $('<span>').text(r.kusy + ' × ' + f4r(r.cena) + ' = ' + f2r(r.cena * r.kusy) + ' €')
                 );
-                $tdL.append($head, $rf, $rv, $rc);
+                $tdL.append($head, $rf);
+                if ($rv) { $tdL.append($rv); }
+                $tdL.append($rc);
 
                 var $trMain = $('<tr></tr>');
                 if (idx > 0) { $trMain.addClass('fa4-item-sep'); }

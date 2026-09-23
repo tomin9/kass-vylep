@@ -45,16 +45,18 @@ foreach ( $polozky_init as $v ) {
     );
     $tlac = (float) ( $v->tlac ?? 0 );
     if ( $tlac > 0 ) {
+        $tlac_kusy = max( 1, (int) $v->kusy ); // rovnaký počet kusov ako výlep
         $polozky_js[] = array(
             'popis'     => 'Tlač – ' . $v->nazov_akcie,
             'fmt'       => $v->format,
             'oi'        => 0,
-            'kusy'      => 1,
-            'cena'      => $tlac,
+            'kusy'      => $tlac_kusy,
+            'cena'      => round( $tlac / $tlac_kusy, 4 ), // cena za kus z celkovej sumy tlače
             'od'        => $v->datum_od,
             'do'        => $v->datum_do,
             'org_nazov' => $v->organizacia_nazov,
-            'manual'    => true, // cena je pevná suma z tlačovej kalkulačky — neprepočítavať z cenníka výlepu
+            'manual'    => true,  // cena je odvodená z tlačovej kalkulačky — neprepočítavať z cenníka výlepu
+            'hasPeriod' => false, // tlač nemá obdobie výlepu
         );
     }
 }
