@@ -54,6 +54,7 @@ class KASS_Vylep_DB {
             cennik_cena DECIMAL(10,4) DEFAULT 0,
             vylep_suma DECIMAL(10,2) DEFAULT 0,
             tlac DECIMAL(10,2) DEFAULT 0,
+            tlac_bez_dph DECIMAL(10,2) DEFAULT 0,
             ine DECIMAL(10,2) DEFAULT 0,
             poznamka TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -63,6 +64,8 @@ class KASS_Vylep_DB {
             KEY organizacia_id (organizacia_id)
         ) $charset;";
         dbDelta( $sql_vylep );
+        // Migrácia — pridaj stĺpec ak neexistuje (staršie inštalácie)
+        $wpdb->query( "ALTER TABLE $vylep ADD COLUMN IF NOT EXISTS tlac_bez_dph DECIMAL(10,2) DEFAULT 0 AFTER tlac" );
 
         $cennik = self::t_cennik();
         $sql_cennik = "CREATE TABLE $cennik (
@@ -180,6 +183,7 @@ class KASS_Vylep_DB {
             'cennik_cena'       => $cena,
             'vylep_suma'        => $vylep_suma,
             'tlac'              => (float) str_replace( ',', '.', $data['tlac'] ),
+            'tlac_bez_dph'      => (float) str_replace( ',', '.', $data['tlac_bez_dph'] ?? 0 ),
             'ine'               => (float) str_replace( ',', '.', $data['ine'] ),
             'poznamka'          => sanitize_textarea_field( $data['poznamka'] ),
         );

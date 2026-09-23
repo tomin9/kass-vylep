@@ -40,10 +40,7 @@ class KASS_Vylep_Public {
                 'orgs'      => $org_list,
                 'cennik'    => KASS_Vylep_Cennik::get_js_matrix(),
                 'faktUrl'   => admin_url( 'admin.php?page=kass-faktura&vylep=' ),
-                'tlacCennik' => array(
-                    'A4' => array( 'cb' => 0.15, 'cb2' => 0.30, 'far' => 0.70 ),
-                    'A3' => array( 'cb' => 0.25, 'cb2' => 0.50, 'far' => 1.40 ),
-                ),
+                'tlacCennik' => KASS_Vylep_Cennik::get_tlac_matrix(),
             ) );
         }
     }
@@ -89,6 +86,7 @@ class KASS_Vylep_Public {
             'kusy'              => $_POST['kusy'] ?? 0,
             'cennik_cena'       => $_POST['cennik_cena'] ?? 0,
             'tlac'              => $_POST['tlac'] ?? 0,
+            'tlac_bez_dph'      => $_POST['tlac_bez_dph'] ?? 0,
             'ine'               => $_POST['ine'] ?? 0,
             'poznamka'          => $_POST['poznamka'] ?? '',
         );
@@ -450,6 +448,7 @@ class KASS_Vylep_Public {
         $cena      = (float) ( $v->cennik_cena ?? 0 );
         $vylep_s   = (float) ( $v->vylep_suma ?? 0 );
         $tlac      = (float) ( $v->tlac ?? 0 );
+        $tlac_bez  = (float) ( $v->tlac_bez_dph ?? 0 );
         $ine       = (float) ( $v->ine ?? 0 );
         $poznamka  = esc_attr( $v->poznamka ?? '' );
         $platba    = $v->platba ?? 'Zadarmo';
@@ -508,7 +507,7 @@ class KASS_Vylep_Public {
   <td><input type=\"number\" class=\"kp-inp kp-kusy\" name=\"kusy\" value=\"$kusy\" min=\"0\"></td>
   <td class=\"kp-calc\"><span class=\"kp-cena-val\">" . ( $cena > 0 ? number_format( $cena, 2, ',', ' ' ) . ' €' : '—' ) . "</span><input type=\"hidden\" class=\"kp-cena\" name=\"cennik_cena\" value=\"$cena\"></td>
   <td class=\"kp-calc kp-bold\"><span class=\"kp-vylep-val\">" . $f2( $vylep_s ) . "</span></td>
-  <td><input type=\"text\" class=\"kp-inp kp-tlac\" name=\"tlac\" value=\"" . ( $tlac > 0 ? number_format( $tlac, 2, ',', ' ' ) . ' €' : '' ) . "\" placeholder=\"0\"></td>
+  <td><input type=\"text\" class=\"kp-inp kp-tlac\" name=\"tlac\" value=\"" . ( $tlac > 0 ? number_format( $tlac, 2, ',', ' ' ) . ' €' : '' ) . "\" placeholder=\"0\"><input type=\"hidden\" class=\"kp-tlac-bez\" value=\"$tlac_bez\"></td>
   <td><input type=\"text\" class=\"kp-inp kp-ine\" name=\"ine\" value=\"" . ( $ine > 0 ? number_format( $ine, 2, ',', ' ' ) . ' €' : '' ) . "\" placeholder=\"0\"></td>
   <td class=\"kp-calc\"><span class=\"kp-hot-val\">" . $f2( $hot ) . "</span></td>
   <td class=\"kp-calc\"><span class=\"kp-fak-val\">" . $f2( $fak ) . "</span></td>
