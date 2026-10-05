@@ -550,7 +550,6 @@ class KASS_Vylep_Public {
         }
 
         $orient = ( ( $v->orientacia ?? 'v' ) === 's' ) ? 's' : 'v';
-        $orient_sym = $orient === 's' ? '▭' : '▯';
         $orient_tit = $orient === 's' ? 'Na šírku' : 'Na výšku';
 
         $plochy_sposob = $v->plochy_sposob ?? 'vsetky';
@@ -580,7 +579,7 @@ class KASS_Vylep_Public {
         <input type=\"hidden\" class=\"kp-format\" name=\"format\" value=\"$current_fmt\">
         <div class=\"kp-fmt-drop\">$fmt_opts</div>
       </div>
-      <button type=\"button\" class=\"kp-orient-btn\" data-val=\"$orient\" title=\"$orient_tit — klik pre zmenu\">$orient_sym</button>
+      <button type=\"button\" class=\"kp-orient-btn\" data-val=\"$orient\" title=\"$orient_tit — klik pre zmenu\"></button>
       <input type=\"hidden\" class=\"kp-orient\" name=\"orientacia\" value=\"$orient\">
     </div>
   </td>

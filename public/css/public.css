@@ -596,11 +596,16 @@ input[type="number"].kp-inp { text-align: center; }
 .kp-fmt-cell { display: flex; align-items: center; gap: 3px; }
 .kp-fmt-cell .kp-fmt-wrap { width: auto; flex: 1 1 auto; }
 .kp-orient-btn {
-    flex: 0 0 auto; width: 22px; height: 22px; padding: 0; cursor: pointer;
-    font-size: 14px; line-height: 1; color: #e5e7eb;
-    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.2); border-radius: 5px;
+    flex: 0 0 auto; width: 28px; height: 28px; padding: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    background: transparent; border: none; border-radius: 6px;
 }
-.kp-orient-btn:hover { background: rgba(255,255,255,.16); }
+.kp-orient-btn::before {
+    content: ''; display: block; box-sizing: border-box;
+    border: 2px solid #e5e7eb; border-radius: 2px; width: 12px; height: 18px;
+}
+.kp-orient-btn[data-val="s"]::before { width: 18px; height: 12px; }
+.kp-orient-btn:hover { background: rgba(255,255,255,.12); }
 .kp-kusy-wrap { display: flex; align-items: center; justify-content: center; }
 .kp-kusy-btn {
     min-width: 44px; padding: 4px 10px; cursor: pointer;
