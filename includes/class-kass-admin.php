@@ -200,7 +200,8 @@ window.KASSVylep = { ajax: '<?php echo esc_url( admin_url( 'admin-ajax.php' ) );
         $top10  = $_POST['top10'] ?? array();
         $top15  = $_POST['top15'] ?? array();
         $top20  = $_POST['top20'] ?? array();
-        $sloty  = $_POST['sloty'] ?? array();
+        $top_u  = $_POST['top_units'] ?? array();
+        $bot_u  = $_POST['bottom_units'] ?? array();
 
         foreach ( KASS_Vylep_Plochy::get_all() as $p ) {
             $id = (int) $p->id;
@@ -209,9 +210,9 @@ window.KASSVylep = { ajax: '<?php echo esc_url( admin_url( 'admin-ajax.php' ) );
                 'top10' => isset( $top10[ $id ] ),
                 'top15' => isset( $top15[ $id ] ),
                 'top20' => isset( $top20[ $id ] ),
+                'top_units'    => $top_u[ $id ] ?? 0,
+                'bottom_units' => $bot_u[ $id ] ?? 0,
             ) );
-            $formaty = isset( $sloty[ $id ] ) ? explode( ',', (string) $sloty[ $id ] ) : array();
-            KASS_Vylep_Plochy::save_sloty( $id, $formaty );
         }
         wp_safe_redirect( admin_url( 'admin.php?page=kass-plochy&msg=saved' ) );
         exit;

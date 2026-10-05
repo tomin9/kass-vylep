@@ -45,10 +45,13 @@
         var opts = ['A4','A3','A2','A1'].map(function(f) {
             return '<div class="kp-fmt-opt" data-val="' + f + '">' + f + '</div>';
         }).join('');
-        return '<div class="kp-fmt-wrap">'
+        return '<div class="kp-fmt-cell"><div class="kp-fmt-wrap">'
             + '<div class="kp-fmt-btn">' + selected + '</div>'
             + '<input type="hidden" class="kp-format" name="format" value="' + selected + '">'
             + '<div class="kp-fmt-drop">' + opts + '</div>'
+            + '</div>'
+            + '<button type="button" class="kp-orient-btn" data-val="v" title="Na výšku — klik pre zmenu">▯</button>'
+            + '<input type="hidden" class="kp-orient" name="orientacia" value="v">'
             + '</div>';
     }
 
@@ -348,6 +351,7 @@
             action: 'kass_pub_save_vylep', nonce: KP.nonce, id: id,
             platba:            $tr.find('.kp-platba-hidden').val() || 'Zadarmo',
             format:            $tr.find('.kp-format').val(),
+            orientacia:        $tr.find('.kp-orient').val() || 'v',
             plochy_sposob:     $tr.find('.kp-plochy-sposob').val() || 'vsetky',
             plochy_vyber:      $tr.find('.kp-plochy-vyber').val() || '',
             organizacia_id:    orgId,
@@ -579,52 +583,133 @@
         });
     }
 
-    var PLOCHY_FORMATY = ['A4', 'A3', 'A2', 'A1'];
+    /* --- Geometria plochy (jednotky = pomer strán papiera) ---
+       Horný rad: modul 100 × 141,4 (A1 na výšku). Spodný rad: modul 70,7 × 100 (A2 na výšku). */
+    var PL = { UW: 100, UH: 141.42, VW: 70.71, VH: 100 };
+    var PLOCHY_NAZVY = {
+        A1v: 'A1 výška', A2s: 'A2 šírka', A3v: 'A3 výška',
+        A2v: 'A2 výška', A3s: 'A3 šírka', A1s: 'A1 šírka', A4: 'A4'
+    };
+
+    function plochyLayoutTop(n, c) {
+        var full = Math.floor(n), half = (n - full) >= 0.5 ? 1 : 0;
+        var cells = [], over = { A1v: 0, A2s: 0, A3v: 0 };
+        var a1 = Math.min(c.A1v || 0, full);
+        over.A1v = (c.A1v || 0) - a1;
+        for (var i = 0; i < a1; i++) { cells.push({ k: 'A1v', x: i * PL.UW, y: 0, w: PL.UW, h: PL.UH }); }
+        var restCols = full - a1;
+        var shelfH = PL.UH / 2;
+        var a2 = Math.min(c.A2s || 0, restCols * 2);
+        over.A2s = (c.A2s || 0) - a2;
+        var a3 = c.A3v || 0;
+        // A3 na výšku: najprv polovičný modul (1 na poličku), potom voľné poličky v plných moduloch (2 na poličku)
+        var a3half = Math.min(a3, half * 2); a3 -= a3half;
+        var freeShelves = restCols * 2 - a2;
+        var a3full = Math.min(a3, freeShelves * 2); a3 -= a3full;
+        over.A3v = a3;
+        var x0 = a1 * PL.UW;
+        for (var s = 0; s < restCols * 2; s++) {
+            var x = x0 + Math.floor(s / 2) * PL.UW, y = (s % 2) * shelfH;
+            if (s < a2) { cells.push({ k: 'A2s', x: x, y: y, w: PL.UW, h: shelfH }); continue; }
+            var left = a3full - (s - a2) * 2;
+            var cnt = Math.max(0, Math.min(2, left));
+            for (var j = 0; j < 2; j++) {
+                cells.push({ k: j < cnt ? 'A3v' : 'free', x: x + j * PL.UW / 2, y: y, w: PL.UW / 2, h: shelfH });
+            }
+        }
+        var hx = (a1 + restCols) * PL.UW;
+        for (var h = 0; h < half * 2; h++) {
+            cells.push({ k: h < a3half ? 'A3v' : 'free', x: hx, y: h * shelfH, w: PL.UW / 2, h: shelfH });
+        }
+        var used = (c.A1v || 0) - over.A1v + ((c.A2s || 0) - over.A2s) * 0.5 + ((c.A3v || 0) - over.A3v) * 0.25;
+        return { cells: cells, over: over, width: n * PL.UW, used: used, cap: n };
+    }
+
+    function plochyLayoutBottom(m, c) {
+        var cells = [], over = { A2v: 0, A1s: 0, A3s: 0 };
+        var a2 = Math.min(c.A2v || 0, m); over.A2v = (c.A2v || 0) - a2;
+        var rest = m - a2;
+        var a1 = Math.min(c.A1s || 0, Math.floor(rest / 2)); over.A1s = (c.A1s || 0) - a1;
+        rest -= a1 * 2;
+        var a3 = Math.min(c.A3s || 0, rest * 2); over.A3s = (c.A3s || 0) - a3;
+        var x = 0, i;
+        for (i = 0; i < a2; i++, x += PL.VW) { cells.push({ k: 'A2v', x: x, y: 0, w: PL.VW, h: PL.VH }); }
+        for (i = 0; i < a1; i++, x += 2 * PL.VW) { cells.push({ k: 'A1s', x: x, y: 0, w: 2 * PL.VW, h: PL.VH }); }
+        for (i = 0; i < rest; i++, x += PL.VW) {
+            var left = a3 - i * 2, cnt = Math.max(0, Math.min(2, left));
+            for (var j = 0; j < 2; j++) {
+                cells.push({ k: j < cnt ? 'A3s' : 'free', x: x, y: j * PL.VH / 2, w: PL.VW, h: PL.VH / 2 });
+            }
+        }
+        var used = a2 + a1 * 2 + Math.ceil(a3 / 2);
+        return { cells: cells, over: over, width: m * PL.VW, used: used, cap: m };
+    }
+
+    function plochySvg(top, bot) {
+        var W = Math.max(top.width, bot.width, 1), H = PL.UH + PL.VH;
+        var ns = 'http://www.w3.org/2000/svg';
+        var svg = document.createElementNS(ns, 'svg');
+        svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+        svg.setAttribute('class', 'kp-plochy-svg');
+        svg.style.width = 'min(100%, ' + Math.round(W * 1.7) + 'px)';
+        function add(cells, dy) {
+            cells.forEach(function (c) {
+                var r = document.createElementNS(ns, 'rect');
+                r.setAttribute('x', c.x); r.setAttribute('y', c.y + dy);
+                r.setAttribute('width', c.w); r.setAttribute('height', c.h);
+                r.setAttribute('class', 'kp-pl-cell kp-pl-' + c.k);
+                svg.appendChild(r);
+                if (c.k !== 'free') {
+                    var t = document.createElementNS(ns, 'text');
+                    t.setAttribute('x', c.x + c.w / 2); t.setAttribute('y', c.y + dy + c.h / 2);
+                    t.setAttribute('class', 'kp-pl-label');
+                    t.textContent = c.k.substring(0, 2);
+                    svg.appendChild(t);
+                }
+            });
+        }
+        add(top.cells, 0);
+        add(bot.cells, PL.UH);
+        return svg;
+    }
+
+    function fmtNum(n) { return (Math.round(n * 100) / 100).toString().replace('.', ','); }
 
     function renderPlochyDetail(plochaId) {
         var p = (KP.plochy || []).filter(function (x) { return x.id === plochaId; })[0];
         var $detail = $('#kp-plochy-detail').empty();
         if (!p) { return; }
 
-        var obsZa = (plochyObsadenost && plochyObsadenost[plochaId]) || { A4: 0, A3: 0, A2: 0, A1: 0 };
+        var c = $.extend({ A1v: 0, A2s: 0, A3v: 0, A2v: 0, A3s: 0, A1s: 0, A4: 0 },
+                         (plochyObsadenost && plochyObsadenost[plochaId]) || {});
 
-        var $title = $('<div class="kp-plochy-rect-title"></div>').text(p.cislo + '. ' + (p.nazov || ''));
-        $detail.append($title);
+        $detail.append($('<div class="kp-plochy-rect-title"></div>').text(p.cislo + '. ' + (p.nazov || '')));
 
-        if (!p.sloty || !p.sloty.length) {
+        if (!p.topUnits && !p.bottomUnits) {
             $detail.append($('<div class="kp-plochy-no-sloty"></div>').text('Táto plocha ešte nemá nastavené rozloženie — nastavte ho v Administrácia → Plochy.'));
             return;
         }
 
-        // Kapacita podľa formátu (počet slotov daného formátu)
-        var kapacita = { A4: 0, A3: 0, A2: 0, A1: 0 };
-        p.sloty.forEach(function (f) { if (kapacita[f] != null) { kapacita[f]++; } });
+        var top = plochyLayoutTop(p.topUnits || 0, c);
+        var bot = plochyLayoutBottom(p.bottomUnits || 0, c);
 
-        // Súhrn nad mriežkou
+        // Súhrn: využitie radov + počty podľa formátu/orientácie
         var $sum = $('<div class="kp-plochy-sum"></div>');
-        PLOCHY_FORMATY.forEach(function (f) {
-            if (!kapacita[f]) { return; }
-            var obsadene = obsZa[f] || 0;
-            var $b = $('<span class="kp-plochy-sum-item"></span>').text(f + ': ' + obsadene + '/' + kapacita[f]);
-            if (obsadene > kapacita[f]) { $b.addClass('kp-plochy-over'); }
-            $sum.append($b);
-        });
+        $sum.append($('<span class="kp-plochy-sum-item"></span>').text('Horný rad: ' + fmtNum(top.used) + ' / ' + fmtNum(top.cap) + ' modulov'));
+        $sum.append($('<span class="kp-plochy-sum-item"></span>').text('Spodný rad: ' + fmtNum(bot.used) + ' / ' + fmtNum(bot.cap) + ' modulov'));
         $detail.append($sum);
 
-        // Mriežka slotov — vyplň prvých N slotov daného formátu podľa obsadenosti
-        var pocitadlo = { A4: 0, A3: 0, A2: 0, A1: 0 };
-        var $grid = $('<div class="kp-plochy-rect"></div>').css('grid-template-columns', 'repeat(' + (p.mriezkaStlpcov || 4) + ', 1fr)');
-        p.sloty.forEach(function (f) {
-            pocitadlo[f]++;
-            var obsadene = pocitadlo[f] <= (obsZa[f] || 0);
-            var over = obsadene && (obsZa[f] || 0) > (kapacita[f] || 0) && pocitadlo[f] === kapacita[f];
-            var $slot = $('<div class="kp-plochy-slot"></div>').addClass('kp-plochy-slot-' + f)
-                .toggleClass('kp-plochy-slot-full', obsadene)
-                .toggleClass('kp-plochy-slot-over', over)
-                .text(f);
-            $grid.append($slot);
+        var $cnt = $('<div class="kp-plochy-sum"></div>');
+        ['A1v', 'A2s', 'A3v', 'A2v', 'A3s', 'A1s', 'A4'].forEach(function (k) {
+            if (!c[k]) { return; }
+            var pretecene = (top.over[k] || 0) + (bot.over[k] || 0);
+            var $b = $('<span class="kp-plochy-sum-item"></span>').text(PLOCHY_NAZVY[k] + ': ' + c[k] + (k === 'A4' ? ' (mimo schémy)' : ''));
+            if (pretecene) { $b.addClass('kp-plochy-over').text(PLOCHY_NAZVY[k] + ': ' + c[k] + ' — nezmestí sa ' + pretecene); }
+            $cnt.append($b);
         });
-        $detail.append($grid);
+        if ($cnt.children().length) { $detail.append($cnt); }
+
+        $detail.append($('<div class="kp-plochy-board"></div>').append(plochySvg(top, bot)));
     }
 
     function openPlochyTab() {
@@ -717,6 +802,18 @@
             scheduleSave($(this).closest('tr'));
         });
         $(document).on('click', function () { $('.kp-fmt-drop').removeClass('open'); });
+
+        // Orientácia plagátu (na výšku / na šírku)
+        $tbody.on('click', '.kp-orient-btn', function (e) {
+            e.stopPropagation();
+            var $b = $(this);
+            var sirka = $b.attr('data-val') === 'v';
+            $b.attr('data-val', sirka ? 's' : 'v')
+              .text(sirka ? '▭' : '▯')
+              .attr('title', (sirka ? 'Na šírku' : 'Na výšku') + ' — klik pre zmenu');
+            $b.siblings('.kp-orient').val(sirka ? 's' : 'v');
+            scheduleSave($b.closest('tr'));
+        });
 
         // Platba dropdown — otvoriť/zatvoriť
         $tbody.on('click', '.kp-platba-btn', function (e) {

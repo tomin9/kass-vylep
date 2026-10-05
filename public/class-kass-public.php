@@ -41,7 +41,6 @@ class KASS_Vylep_Public {
                     'nazov'     => $o->nazov,
                 );
             }
-            $sloty_podla = KASS_Vylep_Plochy::get_sloty_vsetky();
             $plochy_list = array();
             foreach ( KASS_Vylep_Plochy::get_all() as $p ) {
                 $plochy_list[] = array(
@@ -51,8 +50,8 @@ class KASS_Vylep_Public {
                     'top10'  => (bool) $p->top10,
                     'top15'  => (bool) $p->top15,
                     'top20'  => (bool) $p->top20,
-                    'mriezkaStlpcov' => (int) $p->mriezka_stlpcov,
-                    'sloty'  => $sloty_podla[ (int) $p->id ] ?? array(),
+                    'topUnits'    => (float) $p->top_units,
+                    'bottomUnits' => (float) $p->bottom_units,
                 );
             }
             $this->js_data = array(
@@ -127,6 +126,7 @@ class KASS_Vylep_Public {
             'poznamka'          => $_POST['poznamka'] ?? '',
             'plochy_sposob'     => $_POST['plochy_sposob'] ?? 'vsetky',
             'plochy_vyber'      => $_POST['plochy_vyber'] ?? '',
+            'orientacia'        => $_POST['orientacia'] ?? 'v',
         );
         $new_id = KASS_Vylep_DB::save_vylep( $data, $id );
         $row    = KASS_Vylep_DB::get_vylep( $new_id );
@@ -541,6 +541,10 @@ class KASS_Vylep_Public {
             $fmt_opts .= "<div class=\"kp-fmt-opt\" data-val=\"$f\">$f</div>";
         }
 
+        $orient = ( ( $v->orientacia ?? 'v' ) === 's' ) ? 's' : 'v';
+        $orient_sym = $orient === 's' ? '▭' : '▯';
+        $orient_tit = $orient === 's' ? 'Na šírku' : 'Na výšku';
+
         $plochy_sposob = $v->plochy_sposob ?? 'vsetky';
         if ( ! in_array( $plochy_sposob, array( 'vsetky', 'top10', 'top15', 'top20', 'vyber' ), true ) ) {
             $plochy_sposob = 'vsetky';
@@ -569,10 +573,14 @@ class KASS_Vylep_Public {
     </div>
   </td>
   <td>
-    <div class=\"kp-fmt-wrap\">
-      <div class=\"kp-fmt-btn\">$current_fmt</div>
-      <input type=\"hidden\" class=\"kp-format\" name=\"format\" value=\"$current_fmt\">
-      <div class=\"kp-fmt-drop\">$fmt_opts</div>
+    <div class=\"kp-fmt-cell\">
+      <div class=\"kp-fmt-wrap\">
+        <div class=\"kp-fmt-btn\">$current_fmt</div>
+        <input type=\"hidden\" class=\"kp-format\" name=\"format\" value=\"$current_fmt\">
+        <div class=\"kp-fmt-drop\">$fmt_opts</div>
+      </div>
+      <button type=\"button\" class=\"kp-orient-btn\" data-val=\"$orient\" title=\"$orient_tit — klik pre zmenu\">$orient_sym</button>
+      <input type=\"hidden\" class=\"kp-orient\" name=\"orientacia\" value=\"$orient\">
     </div>
   </td>
   <td>

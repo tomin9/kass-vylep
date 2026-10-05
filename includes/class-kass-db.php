@@ -10,7 +10,6 @@ class KASS_Vylep_DB {
     public static function t_vylep() { global $wpdb; return $wpdb->prefix . 'kass_vylepy'; }
     public static function t_cennik(){ global $wpdb; return $wpdb->prefix . 'kass_cennik'; }
     public static function t_plochy(){ global $wpdb; return $wpdb->prefix . 'kass_plochy'; }
-    public static function t_plochy_sloty(){ global $wpdb; return $wpdb->prefix . 'kass_plochy_sloty'; }
 
     /**
      * Vytvorenie tabuliek pri aktivácii.
@@ -61,6 +60,7 @@ class KASS_Vylep_DB {
             poznamka TEXT,
             plochy_sposob VARCHAR(10) DEFAULT 'vsetky',
             plochy_vyber VARCHAR(255) DEFAULT '',
+            orientacia VARCHAR(1) DEFAULT 'v',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             KEY datum_od (datum_od),
@@ -72,6 +72,7 @@ class KASS_Vylep_DB {
         $wpdb->query( "ALTER TABLE $vylep ADD COLUMN IF NOT EXISTS tlac_bez_dph DECIMAL(10,2) DEFAULT 0 AFTER tlac" );
         $wpdb->query( "ALTER TABLE $vylep ADD COLUMN IF NOT EXISTS plochy_sposob VARCHAR(10) DEFAULT 'vsetky'" );
         $wpdb->query( "ALTER TABLE $vylep ADD COLUMN IF NOT EXISTS plochy_vyber VARCHAR(255) DEFAULT ''" );
+        $wpdb->query( "ALTER TABLE $vylep ADD COLUMN IF NOT EXISTS orientacia VARCHAR(1) DEFAULT 'v'" );
 
         $cennik = self::t_cennik();
         $sql_cennik = "CREATE TABLE $cennik (
@@ -99,21 +100,16 @@ class KASS_Vylep_DB {
             top20 TINYINT(1) NOT NULL DEFAULT 0,
             poradie INT NOT NULL DEFAULT 0,
             mriezka_stlpcov INT NOT NULL DEFAULT 4,
+            top_units DECIMAL(4,1) NOT NULL DEFAULT 0,
+            bottom_units DECIMAL(4,1) NOT NULL DEFAULT 0,
             PRIMARY KEY (id),
             KEY cislo (cislo)
         ) $charset;";
         dbDelta( $sql_plochy );
 
-        $plochy_sloty = self::t_plochy_sloty();
-        $sql_plochy_sloty = "CREATE TABLE $plochy_sloty (
-            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            plocha_id BIGINT UNSIGNED NOT NULL,
-            poradie INT NOT NULL DEFAULT 0,
-            format VARCHAR(8) NOT NULL DEFAULT 'A3',
-            PRIMARY KEY (id),
-            KEY plocha_id (plocha_id)
-        ) $charset;";
-        dbDelta( $sql_plochy_sloty );
+        // Migrácia — rozloženie plochy (počet modulov v hornom/spodnom rade)
+        $wpdb->query( "ALTER TABLE $plochy ADD COLUMN IF NOT EXISTS top_units DECIMAL(4,1) NOT NULL DEFAULT 0" );
+        $wpdb->query( "ALTER TABLE $plochy ADD COLUMN IF NOT EXISTS bottom_units DECIMAL(4,1) NOT NULL DEFAULT 0" );
     }
 
     /* ---------------- ODBERATELIA ---------------- */
@@ -206,6 +202,7 @@ class KASS_Vylep_DB {
             $sposob = 'vsetky';
         }
         $vyber = preg_replace( '/[^0-9,]/', '', (string) ( $data['plochy_vyber'] ?? '' ) );
+        $orientacia = ( ( $data['orientacia'] ?? 'v' ) === 's' ) ? 's' : 'v';
 
         $fields = array(
             'organizacia_id'    => ! empty( $data['organizacia_id'] ) ? (int) $data['organizacia_id'] : null,
@@ -226,6 +223,7 @@ class KASS_Vylep_DB {
             'poznamka'          => sanitize_textarea_field( $data['poznamka'] ),
             'plochy_sposob'     => $sposob,
             'plochy_vyber'      => $vyber,
+            'orientacia'        => $orientacia,
         );
 
         if ( $id ) {

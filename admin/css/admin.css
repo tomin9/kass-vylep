@@ -21,14 +21,6 @@
 .kass-sumary { margin-top: 12px; font-size: 14px; }
 .kass-cennik-table input { text-align: right; }
 
-/* ========== Plochy — editor slotov ========== */
-.kass-plocha-sloty { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
-.kass-plocha-chips { display: flex; flex-wrap: wrap; gap: 4px; min-width: 160px; }
-.kass-plocha-chip { display: inline-flex; align-items: center; gap: 4px; background: #e3eaf3; border: 1px solid #b8cce4; border-radius: 4px; padding: 2px 6px; font-size: 12px; font-weight: 600; }
-.kass-plocha-chip-del { border: none; background: none; cursor: pointer; color: #b32d2e; font-size: 11px; padding: 0; line-height: 1; }
-.kass-plocha-empty-hint { color: #888; font-size: 12px; font-style: italic; }
-.kass-plocha-add-sel { font-size: 12px; }
-
 /* ========== Formulár ========== */
 .kass-form .description { color: #777; font-size: 12px; }
 
