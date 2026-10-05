@@ -604,12 +604,10 @@ input[type="number"].kp-inp { text-align: center; }
 .kp-kusy-wrap { display: flex; align-items: center; justify-content: center; }
 .kp-kusy-btn {
     min-width: 44px; padding: 4px 10px; cursor: pointer;
-    font-size: 12px; font-weight: 600; color: #e5e7eb;
-    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.2); border-radius: 6px;
+    font-size: 12px; font-weight: 400; color: #e5e7eb;
+    background: transparent; border: 1px solid transparent; border-radius: 6px;
 }
-.kp-kusy-btn:hover { background: rgba(255,255,255,.16); }
-.kp-kusy-btn.kp-plochy-ok   { border-color: rgba(74,222,128,.75); }
-.kp-kusy-btn.kp-plochy-warn { border-color: #f59e0b; background: rgba(245,158,11,.2); }
+.kp-kusy-btn:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.06); }
 .kp-plochy-kusy-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .kp-plochy-kusy-row label { color: #e5e7eb; font-size: 13px; font-weight: 600; }
 .kp-plochy-kusy-row input {
