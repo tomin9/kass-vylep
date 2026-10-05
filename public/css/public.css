@@ -259,7 +259,7 @@ body.kp-scroll-lock {
 /* Šírky */
 .kp-th-num   { width: 28px; }
 .kp-th-platba{ width: 50px; }
-.kp-th-fmt   { width: 36px; }
+.kp-th-fmt   { width: 66px; }
 .kp-th-kusy  { width: 96px; }
 .kp-th-org   { width: 140px; }
 .kp-th-akcia { width: 200px; }
@@ -593,6 +593,14 @@ input[type="number"].kp-inp { text-align: center; }
 .kp-fmt-opt:hover { background: rgba(255,255,255,.08); }
 
 /* ===== PLOCHY DROPDOWN (rovnaký štýl ako formát/platba) ===== */
+.kp-fmt-cell { display: flex; align-items: center; gap: 3px; }
+.kp-fmt-cell .kp-fmt-wrap { width: auto; flex: 1 1 auto; }
+.kp-orient-btn {
+    flex: 0 0 auto; width: 22px; height: 22px; padding: 0; cursor: pointer;
+    font-size: 14px; line-height: 1; color: #e5e7eb;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.2); border-radius: 5px;
+}
+.kp-orient-btn:hover { background: rgba(255,255,255,.16); }
 .kp-kusy-wrap { display: flex; align-items: center; gap: 4px; }
 .kp-kusy-wrap .kp-kusy { width: 42px; flex: 0 0 auto; }
 .kp-plochy-wrap { flex: 0 0 auto; }
@@ -651,21 +659,16 @@ input[type="number"].kp-inp { text-align: center; }
 }
 .kp-plochy-sum-item.kp-plochy-over { color: #fff; background: rgba(220,38,38,.55); }
 
-.kp-plochy-rect {
-    display: grid; gap: 6px; max-width: 520px;
-}
-.kp-plochy-slot {
-    aspect-ratio: 1 / 1; border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: rgba(255,255,255,.5);
-    background: rgba(255,255,255,.04); border: 1.5px dashed rgba(255,255,255,.2);
-}
-.kp-plochy-slot-full {
-    color: #fff; border-style: solid;
-    background: rgba(74,222,128,.25); border-color: rgba(74,222,128,.6);
-}
-.kp-plochy-slot-over {
-    background: rgba(220,38,38,.5); border-color: rgba(220,38,38,.8);
+.kp-plochy-board { margin-top: 6px; }
+.kp-plochy-svg { display: block; background: rgba(255,255,255,.03); border: 1.5px solid rgba(255,255,255,.35); }
+.kp-pl-cell { stroke: rgba(255,255,255,.55); stroke-width: .8; }
+.kp-pl-free { fill: rgba(255,255,255,.04); stroke: rgba(255,255,255,.25); stroke-dasharray: 3 2; }
+.kp-pl-A1v, .kp-pl-A1s { fill: rgba(96,165,250,.45); }
+.kp-pl-A2v, .kp-pl-A2s { fill: rgba(74,222,128,.40); }
+.kp-pl-A3v, .kp-pl-A3s { fill: rgba(245,158,11,.45); }
+.kp-pl-label {
+    fill: #fff; font-size: 13px; font-weight: 700;
+    text-anchor: middle; dominant-baseline: central; pointer-events: none;
 }
 
 /* ===== PLOCHY — výber konkrétnych plôch (modal) ===== */
