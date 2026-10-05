@@ -410,6 +410,7 @@ input[type="number"].kp-inp { text-align: center; }
 
 /* ===== AKCIE ===== */
 .kp-actions { white-space: nowrap; text-align: center; }
+.kp-actions > * { margin: 0 2px; }
 .kp-btn-save, .kp-btn-del, .kp-btn-fakt {
     border: none; background: none; cursor: pointer;
     font-size: 14px; padding: 3px 4px; border-radius: 5px; line-height: 1;

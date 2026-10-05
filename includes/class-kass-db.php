@@ -168,8 +168,11 @@ class KASS_Vylep_DB {
             $params[] = $args['active_on'];
         }
         if ( ! empty( $args['rok'] ) ) {
-            $where .= ' AND YEAR(datum_od) = %d';
-            $params[] = (int) $args['rok'];
+            // Rozsah namiesto YEAR(datum_od): funkcia na stĺpci by zabránila použitiu indexu datum_od
+            $rok = (int) $args['rok'];
+            $where .= ' AND datum_od >= %s AND datum_od < %s';
+            $params[] = sprintf( '%04d-01-01', $rok );
+            $params[] = sprintf( '%04d-01-01', $rok + 1 );
         }
 
         $sql = "SELECT * FROM $t WHERE $where ORDER BY datum_od ASC, id ASC";

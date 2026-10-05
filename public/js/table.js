@@ -28,27 +28,29 @@
         { val: 'K',  full: 'Karta' },
     ];
 
+    // Obsah rozbaľovacích zoznamov sa vkladá až pri prvom otvorení (riadkov je stovky)
+    var PLATBA_OPTS_HTML = PLATBA_OPTS.map(function (o) {
+        return '<div class="kp-platba-opt" data-val="' + o.val + '" data-full="' + o.full + '">'
+             + '<span class="kp-platba-skr">' + o.val + '</span>' + o.full + '</div>';
+    }).join('');
+    var FMT_OPTS_HTML = ['A4', 'A3', 'A2', 'A1'].map(function (f) {
+        return '<div class="kp-fmt-opt" data-val="' + f + '">' + f + '</div>';
+    }).join('');
+
     function platbaDropHtml(selectedFull) {
         var skr = PLATBA_TO_SKR[selectedFull] || 'Z';
-        var opts = PLATBA_OPTS.map(function(o) {
-            return '<div class="kp-platba-opt" data-val="' + o.val + '" data-full="' + o.full + '">'
-                 + '<span class="kp-platba-skr">' + o.val + '</span>' + o.full + '</div>';
-        }).join('');
         return '<div class="kp-platba-wrap">'
             + '<div class="kp-platba-btn" data-val="' + skr + '" data-full="' + selectedFull + '">' + skr + '</div>'
             + '<input type="hidden" class="kp-platba-hidden" name="platba" value="' + selectedFull + '">'
-            + '<div class="kp-platba-drop">' + opts + '</div>'
+            + '<div class="kp-platba-drop"></div>'
             + '</div>';
     }
     function fmtDropHtml(selected) {
         selected = selected || 'A3';
-        var opts = ['A4','A3','A2','A1'].map(function(f) {
-            return '<div class="kp-fmt-opt" data-val="' + f + '">' + f + '</div>';
-        }).join('');
         return '<div class="kp-fmt-cell"><div class="kp-fmt-wrap">'
             + '<div class="kp-fmt-btn">' + selected + '</div>'
             + '<input type="hidden" class="kp-format" name="format" value="' + selected + '">'
-            + '<div class="kp-fmt-drop">' + opts + '</div>'
+            + '<div class="kp-fmt-drop"></div>'
             + '</div>'
             + '<button type="button" class="kp-orient-btn" data-val="v" title="Na výšku — klik pre zmenu"></button>'
             + '<input type="hidden" class="kp-orient" name="orientacia" value="v">'
@@ -117,6 +119,9 @@
         return total;
     }
 
+    // Riadok je zobrazený, ak ho filter neschoval (rýchlejšie ako :visible, ktoré vynucuje prepočet rozloženia)
+    function isRowShown() { return this.style.display !== 'none'; }
+
     /* ===== DÁTUM — iba utorky cez Flatpickr ===== */
     function isoToDM(iso) {
         if (!iso) return '';
@@ -131,32 +136,37 @@
         else     { $txt.html('&#128197;').addClass('kp-date-empty'); }
     }
 
+    // Flatpickr sa vytvára až pri prvom kliknutí na dátum (nie pre každý z ~500 dátumov pri načítaní —
+    // každá inštancia totiž vytvorí celý kalendár v DOM).
     function initDateShort($tr) {
         $tr.find('.kp-date-real').each(function () {
             var $inp = $(this);
             var $txt = $inp.siblings('.kp-date-txt');
             var isOd = $inp.hasClass('kp-od');
 
-            // Inicializuj Flatpickr — iba utorky
-            var fp = flatpickr($inp[0], {
-                dateFormat:  'Y-m-d',
-                clickOpens:  false,
-                allowInput:  false,
-                appendTo:    document.body,
-                locale:      { firstDayOfWeek: 1 },
-                disable:     isOd ? [ function(date) { return date.getDay() !== 2; } ] : [],
-                onChange: function(selectedDates, dateStr) {
-                    if (!selectedDates.length) { return; }
-                    $inp.val(dateStr);
-                    setDateDisplay($txt, dateStr);
-                    syncDates($tr, isOd ? 'od' : 'do');
-                    recalcRow($tr);
-                    recalcTotals();
-                    scheduleSave($tr);
+            $txt.on('click', function () {
+                var fp = $inp[0]._flatpickr;
+                if (!fp) {
+                    fp = flatpickr($inp[0], {
+                        dateFormat:  'Y-m-d',
+                        clickOpens:  false,
+                        allowInput:  false,
+                        appendTo:    document.body,
+                        locale:      { firstDayOfWeek: 1 },
+                        disable:     isOd ? [ function(date) { return date.getDay() !== 2; } ] : [],
+                        onChange: function(selectedDates, dateStr) {
+                            if (!selectedDates.length) { return; }
+                            $inp.val(dateStr);
+                            setDateDisplay($txt, dateStr);
+                            syncDates($tr, isOd ? 'od' : 'do');
+                            recalcRow($tr);
+                            recalcTotals();
+                            scheduleSave($tr);
+                        }
+                    });
                 }
+                fp.open();
             });
-
-            $txt.on('click', function () { fp.open(); });
             setDateDisplay($txt, $inp.val()); // počiatočné zobrazenie
         });
     }
@@ -410,7 +420,7 @@
 
     /* ===== ODDEĽOVAČ TÝŽDŇOV ===== */
     function updateWeekSeparators() {
-        var $rows = $('#kp-tbody .kp-row:visible');
+        var $rows = $('#kp-tbody .kp-row').filter(isRowShown);
         var prevOd = null;
         $rows.each(function () {
             var $tr = $(this);
@@ -434,7 +444,7 @@
             var $tr       = $(this);
             var orgMatch    = !orgVal    || $tr.attr('data-org') === orgVal;
             var mesMatch    = !mesVal    || String($tr.attr('data-mes')) === String(mesVal);
-            var platbaMatch = !platbaVal || $tr.find('.kp-platba-hidden').val() === platbaVal;
+            var platbaMatch = !platbaVal || (PLATBA_TO_SKR[$tr.find('.kp-platba-hidden').val()] || '') === platbaVal;
             var show = orgMatch && mesMatch && platbaMatch;
             $tr.toggle(show);
             if (show) { visible++; }
@@ -452,7 +462,7 @@
         // Renumber visible rows
         function renumberRows() {
             var n = 1;
-            $('#kp-tbody .kp-row:visible').each(function () {
+            $('#kp-tbody .kp-row').filter(isRowShown).each(function () {
                 $(this).find('.kp-num-edit').text(n++);
             });
         }
@@ -487,7 +497,7 @@
     function recalcTotals() {
         updateWeekSeparators();
         var sv = 0, st = 0, si = 0, sh = 0, sf = 0, sz = 0, sk = 0;
-        $('#kp-tbody .kp-row:visible').each(function () {
+        $('#kp-tbody .kp-row').filter(isRowShown).each(function () {
             var $tr    = $(this);
             var fmt    = $tr.find('.kp-format').val();
             var tyzdne = parseInt($tr.find('.kp-tyzdne').val(), 10) || 1;
@@ -824,6 +834,7 @@
             e.stopPropagation();
             var $btn  = $(this);
             var $drop = $btn.siblings('.kp-fmt-drop');
+            if (!$drop.children().length) { $drop.html(FMT_OPTS_HTML); }
             var wasOpen = $drop.hasClass('open');
             $('.kp-fmt-drop, .kp-platba-drop').removeClass('open');
             if (!wasOpen) { openFixedDrop($btn, $drop); }
@@ -860,6 +871,7 @@
             e.stopPropagation();
             var $btn  = $(this);
             var $drop = $btn.siblings('.kp-platba-drop');
+            if (!$drop.children().length) { $drop.html(PLATBA_OPTS_HTML); }
             var wasOpen = $drop.hasClass('open');
             $('.kp-platba-drop').removeClass('open');
             if (!wasOpen) { openFixedDrop($btn, $drop); }
@@ -1085,7 +1097,7 @@
 
             var neprelepit = [], prelepit = [];
 
-            $('#kp-tbody .kp-row:visible').each(function () {
+            $('#kp-tbody .kp-row').filter(isRowShown).each(function () {
                 var $tr   = $(this);
                 var doVal  = $tr.find('.kp-do').val();
                 var platba = $tr.find('.kp-platba-hidden').val();
@@ -1094,7 +1106,8 @@
                 var akcia  = $tr.find('.kp-akcia').val() || '';
                 var od     = $tr.find('.kp-od').val();
                 if (!doVal) { return; }
-                var isPaid = (platba === 'H' || platba === 'FA' || platba === 'K');
+                var platbaSkr = PLATBA_TO_SKR[platba] || platba;
+                var isPaid = (platbaSkr === 'H' || platbaSkr === 'FA' || platbaSkr === 'K');
                 var item   = { fmt: fmt || '', org: org, akcia: akcia, od: od, do: doVal };
                 if (doVal === thisTueStr && isPaid) { prelepit.push(item); }
                 else if (doVal > thisTueStr)        { neprelepit.push(item); }
