@@ -50,7 +50,7 @@
             + '<input type="hidden" class="kp-format" name="format" value="' + selected + '">'
             + '<div class="kp-fmt-drop">' + opts + '</div>'
             + '</div>'
-            + '<button type="button" class="kp-orient-btn" data-val="v" title="Na výšku — klik pre zmenu">▯</button>'
+            + '<button type="button" class="kp-orient-btn" data-val="v" title="Na výšku — klik pre zmenu"></button>'
             + '<input type="hidden" class="kp-orient" name="orientacia" value="v">'
             + '</div>';
     }
@@ -850,7 +850,6 @@
             var $b = $(this);
             var sirka = $b.attr('data-val') === 'v';
             $b.attr('data-val', sirka ? 's' : 'v')
-              .text(sirka ? '▭' : '▯')
               .attr('title', (sirka ? 'Na šírku' : 'Na výšku') + ' — klik pre zmenu');
             $b.siblings('.kp-orient').val(sirka ? 's' : 'v');
             scheduleSave($b.closest('tr'));
