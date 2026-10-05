@@ -324,6 +324,7 @@ body.kp-scroll-lock {
     border-bottom: none;
 }
 .kp-sum { text-align: center; }
+.kp-sum-loading .kp-sum { opacity: .3; }
 /* Sticky súčtový riadok */
 .kp-table tfoot tr td {
     position: sticky;

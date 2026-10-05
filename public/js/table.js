@@ -774,18 +774,56 @@
     $(function () {
         var $tbody = $('#kp-tbody');
 
+        function initRow($r) {
+            initAC($r.find('.kp-ac-wrap'));
+            initDateShort($r);
+            recalcRow($r);
+        }
+
         // Init existujúcich riadkov
-        $tbody.find('.kp-row').each(function () {
-            initAC($(this).find('.kp-ac-wrap'));
-            initDateShort($(this));
-            recalcRow($(this));
-        });
+        $tbody.find('.kp-row').each(function () { initRow($(this)); });
+
+        var t0Init = (window.performance && performance.now) ? performance.now() : 0;
+        if (window.console) { console.info('[kass-vylep] stránka začala spracovanie v ' + Math.round(t0Init) + ' ms od otvorenia, prvé riadky pripravené'); }
+
+        // Staršie riadky (v <template>) sa doplnia po dávkach na pozadí, aby sa stránka dala používať hneď
+        var rowsLoading = false;
+        (function loadOlderRows() {
+            var tpl = document.getElementById('kp-older-rows');
+            if (!tpl) { return; }
+            var pending = Array.prototype.slice.call(tpl.content.children);
+            var total = pending.length + $tbody.find('.kp-row').length;
+            var CHUNK = 45;
+            rowsLoading = true;
+            $('#kp-sum-row').addClass('kp-sum-loading');
+            $('#kp-count').text(total + ' riadkov');
+            function finish() {
+                if (window.console) { console.info('[kass-vylep] všetkých ' + total + ' riadkov hotových po ' + Math.round(performance.now()) + ' ms'); }
+                rowsLoading = false;
+                $(tpl).remove();
+                $('#kp-sum-row').removeClass('kp-sum-loading');
+                if ($('#kp-filter-org').val() || $('#kp-filter-mes').val() || $('#kp-filter-platba').val()) { applyFilter(); }
+                else { $('#kp-count').text($tbody.find('.kp-row').length + ' riadkov'); recalcTotals(); }
+            }
+            function step() {
+                var chunk = pending.splice(Math.max(0, pending.length - CHUNK), CHUNK);
+                var frag = document.createDocumentFragment();
+                chunk.forEach(function (tr) { frag.appendChild(tr); });
+                tbody0.insertBefore(frag, tbody0.firstChild);
+                chunk.forEach(function (tr) { var $r = $(tr); initRow($r); plochyState($r); });
+                $('#kp-count').text(total + ' riadkov');
+                if (pending.length) { setTimeout(step, 25); } else { finish(); }
+            }
+            var tbody0 = $tbody[0];
+            setTimeout(step, 30);
+        })();
 
         recalcTotals();
         $('#kp-count').text($tbody.find('.kp-row').length + ' riadkov');
 
         // Pridať riadok
         $('#kp-add-row').on('click', function () {
+            if (rowsLoading) { status('Načítavam staršie záznamy…', false); return; }
             var num = $tbody.find('.kp-row').length + 1;
             var $tr = $(newRowHtml(num));
             $tbody.append($tr);

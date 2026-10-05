@@ -3,6 +3,9 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 class KASS_Vylep_Public {
 
+    /** Koľko najnovších riadkov sa vykreslí okamžite (zvyšok sa dopĺňa na pozadí). */
+    const RIADKOV_HNED = 60;
+
     public function hooks() {
         add_shortcode( 'kass_plagat', array( $this, 'shortcode' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'assets' ) );
@@ -209,6 +212,7 @@ class KASS_Vylep_Public {
     /* ===== TABUĽKA ===== */
 
     private function render_tabulka() {
+        $t_start = microtime( true );
         $user    = wp_get_current_user();
         $rok     = isset( $_GET['rok'] ) ? (int) $_GET['rok'] : (int) date( 'Y' );
         $vylepy  = KASS_Vylep_DB::get_vylepy( array( 'rok' => $rok ) );
@@ -331,9 +335,15 @@ class KASS_Vylep_Public {
                     <thead class="kp-thead-src"><?php echo $thead_row; ?></thead>
                     <tbody id="kp-tbody">
                         <?php
+                        // Najnovších KP_RIADKOV_HNED riadkov sa vykreslí hneď, staršie ide do <template>
+                        // a JS ich dopĺňa po dávkach (vykreslenie stoviek riadkov naraz je pomalé).
+                        $celkom  = count( $vylepy );
+                        $starsie = max( 0, $celkom - self::RIADKOV_HNED );
                         $i = 1;
-                        foreach ( $vylepy as $v ) {
-                            echo $this->row_html( $v, $i++ );
+                        $older_html = '';
+                        foreach ( $vylepy as $idx => $v ) {
+                            if ( $idx < $starsie ) { $older_html .= $this->row_html( $v, $i++ ); }
+                            else                   { echo $this->row_html( $v, $i++ ); }
                         }
                         ?>
                     </tbody>
@@ -358,6 +368,11 @@ class KASS_Vylep_Public {
                 <div class="kp-plochy-selector" id="kp-plochy-selector"></div>
                 <div class="kp-plochy-detail" id="kp-plochy-detail"></div>
             </div>
+
+            <?php printf( "<!-- kass-vylep: %d riadkov, generovanie tabuľky %d ms, %d kB HTML -->\n", $celkom, round( ( microtime( true ) - $t_start ) * 1000 ), round( strlen( $older_html ) / 1024 ) ); ?>
+            <?php if ( $older_html !== '' ) : ?>
+            <template id="kp-older-rows"><?php echo $older_html; ?></template>
+            <?php endif; ?>
 
         </div><!-- .kp-app -->
         </div><!-- .kp-fullwidth -->
