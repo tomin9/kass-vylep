@@ -62,24 +62,22 @@
         if (sposob === 'vyber')  { return (vyberCsv || '').split(',').filter(function (x) { return x; }).length; }
         return all.filter(function (p) { return p[sposob]; }).length;
     }
-    // Ikona výberu plôch: zelená = počet plôch sedí s kusmi, oranžová = nesedí
+    // Tlačidlo s počtom kusov: zelený okraj = počet kusov sedí s počtom plôch, oranžový = nesedí
     function plochyState($tr) {
         var sposob = $tr.find('.kp-plochy-sposob').val() || 'vsetky';
         var csv    = $tr.find('.kp-plochy-vyber').val() || '';
         var n      = plochyCount(sposob, csv);
         var kusy   = parseInt($tr.find('.kp-kusy').val(), 10) || 0;
         var ok     = n > 0 && n === kusy;
-        var txt    = (PLOCHY_POPIS[sposob] || sposob) + ': ' + n + ' plôch';
-        if (!ok) { txt += ' — kusy (' + kusy + ') nesedia s počtom plôch, klikni a vyber plochy'; }
-        $tr.find('.kp-plochy-btn').toggleClass('kp-plochy-ok', ok).toggleClass('kp-plochy-warn', !ok).attr('title', txt);
+        var txt    = 'Kusy: ' + kusy + ' · ' + (PLOCHY_POPIS[sposob] || sposob) + ': ' + n + ' plôch';
+        if (!ok) { txt += ' — nesedia, klikni a prideľ plochy'; }
+        $tr.find('.kp-kusy-btn').text(kusy > 0 ? kusy : '—')
+           .toggleClass('kp-plochy-ok', ok).toggleClass('kp-plochy-warn', !ok).attr('title', txt);
     }
     function plochyCellHtml(sposob, vyberCsv) {
-        sposob = sposob || 'vsetky';
-        vyberCsv = vyberCsv || '';
         return '<div class="kp-plochy-wrap">'
-            + '<div class="kp-plochy-btn" data-val="' + sposob + '" title="Priradiť plochy">📍</div>'
-            + '<input type="hidden" class="kp-plochy-sposob" name="plochy_sposob" value="' + sposob + '">'
-            + '<input type="hidden" class="kp-plochy-vyber" name="plochy_vyber" value="' + vyberCsv + '">'
+            + '<input type="hidden" class="kp-plochy-sposob" name="plochy_sposob" value="' + (sposob || 'vsetky') + '">'
+            + '<input type="hidden" class="kp-plochy-vyber" name="plochy_vyber" value="' + (vyberCsv || '') + '">'
             + '</div>';
     }
 
@@ -533,7 +531,7 @@
             + '<td class="kp-date-cell"><span class="kp-date-txt kp-od-txt"></span><input type="date" class="kp-date-real kp-od" name="datum_od" value=""></td>'
             + '<td class="kp-date-cell"><span class="kp-date-txt kp-do-txt"></span><input type="date" class="kp-date-real kp-do" name="datum_do" value=""></td>'
             + '<td><input type="number" class="kp-inp kp-tyzdne" name="tyzdne" placeholder="T" min="1" max="20"></td>'
-            + '<td><div class="kp-kusy-wrap"><input type="number" class="kp-inp kp-kusy" name="kusy" placeholder="ks" min="0">' + plochyCellHtml('vsetky', '') + '</div></td>'
+            + '<td><div class="kp-kusy-wrap"><button type="button" class="kp-kusy-btn" title="Kusy a plochy">—</button><input type="hidden" class="kp-kusy" name="kusy" value="">' + plochyCellHtml('vsetky', '') + '</div></td>'
             + '<td class="kp-calc"><span class="kp-cena-val">—</span><input type="hidden" class="kp-cena" value="0"></td>'
             + '<td class="kp-calc kp-bold"><span class="kp-vylep-val">—</span></td>'
             + '<td><input type="text" class="kp-inp kp-tlac" placeholder="0"><input type="hidden" class="kp-tlac-bez" value="0"></td>'
@@ -883,15 +881,18 @@
         // Zatvoriť kliknutím mimo
         $(document).on('click', function () { $('.kp-platba-drop').removeClass('open'); });
 
-        // Plochy — modal (rovnaký vzor ako Tlač)
+        // Kusy + plochy — modal (rovnaký vzor ako Tlač)
         var $plochyRow   = null;
         var $plochyModal = $('#kp-plochy-modal');
         var plochyMode   = 'vsetky';
+        var $kusyInp     = $('#kp-plochy-kusy');
 
         function plochyUpdateCount() {
-            var n = plochyMode === 'vyber' ? $('#kp-plochy-picker-grid input:checked').length : plochyCount(plochyMode, '');
-            var kusy = $plochyRow ? (parseInt($plochyRow.find('.kp-kusy').val(), 10) || 0) : 0;
-            $('#kp-plochy-count').text('Plagát bude na ' + n + ' plochách (kusy sa nastavia na ' + n + '; teraz: ' + kusy + ')');
+            var n    = plochyMode === 'vyber' ? $('#kp-plochy-picker-grid input:checked').length : plochyCount(plochyMode, '');
+            var kusy = parseInt($kusyInp.val(), 10) || 0;
+            var ok   = n > 0 && n === kusy;
+            $('#kp-plochy-count').toggleClass('kp-plochy-count-warn', !ok)
+                .text('Vybrané plochy: ' + n + ' · Kusy: ' + kusy + (ok ? ' ✓' : ' — počet kusov a plôch sa nezhoduje'));
         }
         function plochySetMode(mode) {
             plochyMode = mode;
@@ -899,7 +900,6 @@
             $('#kp-plochy-picker-grid').toggle(mode === 'vyber');
             plochyUpdateCount();
         }
-        $('#kp-plochy-picker-grid').on('change', 'input', plochyUpdateCount);
         function plochyOpen($tr) {
             $plochyRow = $tr;
             var mode  = $tr.find('.kp-plochy-sposob').val() || 'vsetky';
@@ -911,34 +911,59 @@
                 $lbl.append(' ' + p.cislo + '. ' + (p.nazov || ''));
                 $grid.append($lbl);
             });
+            $kusyInp.val($tr.find('.kp-kusy').val() || '');
             plochySetMode(mode);
             $plochyModal.addClass('open');
+            setTimeout(function () { $kusyInp.trigger('focus').trigger('select'); }, 30);
         }
         function plochyClose() { $plochyModal.removeClass('open'); $plochyRow = null; }
 
-        $tbody.on('click', '.kp-plochy-btn', function () { plochyOpen($(this).closest('tr')); });
-        $('#kp-plochy-modes').on('click', '.kp-plochy-mode-btn', function () { plochySetMode($(this).attr('data-val')); });
+        // Zadanie počtu kusov: 26 = všetky plochy; 10/15/20 = zodpovedajúce TOP; inak ručný výber
+        $kusyInp.on('input', function () {
+            var n = parseInt($(this).val(), 10) || 0;
+            var all = (KP.plochy || []).length;
+            if (n > 0 && n === all) { plochySetMode('vsetky'); return; }
+            if (plochyMode !== 'vyber') {
+                var top = 'top' + n;
+                if ((n === 10 || n === 15 || n === 20) && plochyCount(top, '') === n) { plochySetMode(top); return; }
+                if (n > 0) { plochySetMode('vyber'); return; }
+            }
+            plochyUpdateCount();
+        });
+        // Voľba hotového režimu nastaví kusy podľa počtu plôch
+        $('#kp-plochy-modes').on('click', '.kp-plochy-mode-btn', function () {
+            var mode = $(this).attr('data-val');
+            plochySetMode(mode);
+            if (mode !== 'vyber') {
+                var n = plochyCount(mode, '');
+                if (n > 0) { $kusyInp.val(n); plochyUpdateCount(); }
+            }
+        });
+        // Ručný výber plôch nastaví kusy podľa počtu zaškrtnutých
+        $('#kp-plochy-picker-grid').on('change', 'input', function () {
+            $kusyInp.val($('#kp-plochy-picker-grid input:checked').length);
+            plochyUpdateCount();
+        });
+
+        $tbody.on('click', '.kp-kusy-btn', function () { plochyOpen($(this).closest('tr')); });
         $('#kp-plochy-cancel').on('click', plochyClose);
         $plochyModal.on('click', function (e) { if (e.target === this) { plochyClose(); } });
+        $kusyInp.on('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); $('#kp-plochy-ok').trigger('click'); } });
         $('#kp-plochy-ok').on('click', function () {
             if (!$plochyRow) { return; }
+            var $row = $plochyRow;
             var csv = '';
-            if (plochyMode === 'vyber') {
+            var mode = plochyMode;
+            if (mode === 'vyber') {
                 var ids = [];
                 $('#kp-plochy-picker-grid input:checked').each(function () { ids.push(this.value); });
-                if (!ids.length) { plochySetMode('vsetky'); }
-                csv = ids.join(',');
+                if (!ids.length) { mode = 'vsetky'; } else { csv = ids.join(','); }
             }
-            var $wrap = $plochyRow.find('.kp-plochy-wrap');
-            $wrap.find('.kp-plochy-btn').attr('data-val', plochyMode);
-            $wrap.find('.kp-plochy-sposob').val(plochyMode);
-            $wrap.find('.kp-plochy-vyber').val(csv);
-            // Kusy = počet vybraných plôch (jeden plagát na plochu); používateľ ich môže potom prepísať
-            var pocet = plochyCount(plochyMode, csv);
-            var $row = $plochyRow;
+            var kusy = parseInt($kusyInp.val(), 10) || 0;
             plochyClose();
-            if (pocet > 0) { $row.find('.kp-kusy').val(pocet).trigger('change'); }
-            else { scheduleSave($row); }
+            $row.find('.kp-plochy-sposob').val(mode);
+            $row.find('.kp-plochy-vyber').val(csv);
+            $row.find('.kp-kusy').val(kusy).trigger('change');
             plochyState($row);
         });
 

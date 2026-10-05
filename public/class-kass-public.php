@@ -492,7 +492,11 @@ class KASS_Vylep_Public {
         <!-- Priradenie plôch modal (rovnaký vzor ako Tlač) -->
         <div class="kp-tlac-modal" id="kp-plochy-modal">
             <div class="kp-tlac-box" style="width:440px;">
-                <h3>🧱 Priradiť plochy</h3>
+                <h3>🧱 Kusy a plochy</h3>
+                <div class="kp-plochy-kusy-row">
+                    <label for="kp-plochy-kusy">Počet kusov</label>
+                    <input type="number" id="kp-plochy-kusy" min="0" max="999">
+                </div>
                 <div class="kp-plochy-modes" id="kp-plochy-modes">
                     <button type="button" class="kp-plochy-mode-btn" data-val="vsetky">26 (všetky)</button>
                     <button type="button" class="kp-plochy-mode-btn" data-val="top10">TOP 10</button>
@@ -596,9 +600,9 @@ class KASS_Vylep_Public {
   <td><input type=\"number\" class=\"kp-inp kp-tyzdne\" name=\"tyzdne\" value=\"$tyzdne\" min=\"1\" max=\"20\"></td>
   <td>
     <div class=\"kp-kusy-wrap\">
-      <input type=\"number\" class=\"kp-inp kp-kusy\" name=\"kusy\" value=\"$kusy\" min=\"0\">
+      <button type=\"button\" class=\"kp-kusy-btn\" title=\"Kusy a plochy\">$kusy</button>
+      <input type=\"hidden\" class=\"kp-kusy\" name=\"kusy\" value=\"$kusy\">
       <div class=\"kp-plochy-wrap\">
-        <div class=\"kp-plochy-btn\" data-val=\"$plochy_sposob\" title=\"Priradiť plochy\">📍</div>
         <input type=\"hidden\" class=\"kp-plochy-sposob\" name=\"plochy_sposob\" value=\"$plochy_sposob\">
         <input type=\"hidden\" class=\"kp-plochy-vyber\" name=\"plochy_vyber\" value=\"$plochy_vyber\">
       </div>

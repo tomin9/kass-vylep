@@ -260,7 +260,7 @@ body.kp-scroll-lock {
 .kp-th-num   { width: 28px; }
 .kp-th-platba{ width: 50px; }
 .kp-th-fmt   { width: 66px; }
-.kp-th-kusy  { width: 96px; }
+.kp-th-kusy  { width: 72px; }
 .kp-th-org   { width: 140px; }
 .kp-th-akcia { width: 200px; }
 .kp-th-date  { width: 52px; }
@@ -601,18 +601,22 @@ input[type="number"].kp-inp { text-align: center; }
     background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.2); border-radius: 5px;
 }
 .kp-orient-btn:hover { background: rgba(255,255,255,.16); }
-.kp-kusy-wrap { display: flex; align-items: center; gap: 4px; }
-.kp-kusy-wrap .kp-kusy { width: 42px; flex: 0 0 auto; }
-.kp-plochy-wrap { flex: 0 0 auto; }
-.kp-plochy-btn {
-    min-width: 26px; text-align: center; cursor: pointer; font-size: 12px; line-height: 1.1;
-    font-weight: 700; padding: 3px 5px; border-radius: 5px; white-space: nowrap;
-    border: 1px solid rgba(255,255,255,.2); color: #e5e7eb;
-    background: rgba(255,255,255,.06); user-select: none;
+.kp-kusy-wrap { display: flex; align-items: center; justify-content: center; }
+.kp-kusy-btn {
+    min-width: 44px; padding: 4px 10px; cursor: pointer;
+    font-size: 12px; font-weight: 600; color: #e5e7eb;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.2); border-radius: 6px;
 }
-.kp-plochy-btn:hover { background: rgba(255,255,255,.16); }
-.kp-plochy-btn.kp-plochy-ok   { border-color: rgba(74,222,128,.75); }
-.kp-plochy-btn.kp-plochy-warn { border-color: #f59e0b; background: rgba(245,158,11,.2); }
+.kp-kusy-btn:hover { background: rgba(255,255,255,.16); }
+.kp-kusy-btn.kp-plochy-ok   { border-color: rgba(74,222,128,.75); }
+.kp-kusy-btn.kp-plochy-warn { border-color: #f59e0b; background: rgba(245,158,11,.2); }
+.kp-plochy-kusy-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.kp-plochy-kusy-row label { color: #e5e7eb; font-size: 13px; font-weight: 600; }
+.kp-plochy-kusy-row input {
+    width: 80px; padding: 6px 8px; font-size: 14px; text-align: center;
+    background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.25); border-radius: 6px;
+}
+.kp-plochy-count-warn { color: #fbbf24 !important; }
 .kp-plochy-count { color: rgba(255,255,255,.7); font-size: 12px; margin: 0 0 12px; }
 
 /* ===== PLOCHY — modal priradenia (vzor Tlač) ===== */
