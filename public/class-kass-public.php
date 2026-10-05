@@ -465,17 +465,21 @@ class KASS_Vylep_Public {
             </div>
         </div>
 
-        <!-- Výber konkrétnych plôch -->
-        <div class="kp-modal-overlay" id="kp-plochy-picker-modal">
-            <div class="kp-modal-box" style="max-width:480px;height:auto;max-height:80vh;">
-                <div class="kp-modal-bar" style="justify-content:space-between;padding:8px 14px;">
-                    <span style="color:#fff;font-size:13px;font-weight:600;">Vybrať konkrétne plochy</span>
-                    <button type="button" id="kp-plochy-picker-close" class="kp-modal-close">✕</button>
+        <!-- Priradenie plôch modal (rovnaký vzor ako Tlač) -->
+        <div class="kp-tlac-modal" id="kp-plochy-modal">
+            <div class="kp-tlac-box" style="width:440px;">
+                <h3>🧱 Priradiť plochy</h3>
+                <div class="kp-plochy-modes" id="kp-plochy-modes">
+                    <button type="button" class="kp-plochy-mode-btn" data-val="vsetky">26 (všetky)</button>
+                    <button type="button" class="kp-plochy-mode-btn" data-val="top10">TOP 10</button>
+                    <button type="button" class="kp-plochy-mode-btn" data-val="top15">TOP 15</button>
+                    <button type="button" class="kp-plochy-mode-btn" data-val="top20">TOP 20</button>
+                    <button type="button" class="kp-plochy-mode-btn" data-val="vyber">Vybrať konkrétne</button>
                 </div>
-                <div class="kp-plochy-picker-grid" id="kp-plochy-picker-grid"></div>
-                <div class="kp-plochy-picker-btns">
-                    <button type="button" class="kp-tlac-cancel" id="kp-plochy-picker-cancel">Zrušiť</button>
-                    <button type="button" class="kp-tlac-confirm" id="kp-plochy-picker-ok">Potvrdiť</button>
+                <div class="kp-plochy-picker-grid" id="kp-plochy-picker-grid" style="display:none;"></div>
+                <div class="kp-tlac-btns">
+                    <button type="button" class="kp-tlac-cancel" id="kp-plochy-cancel">Zrušiť</button>
+                    <button type="button" class="kp-tlac-confirm" id="kp-plochy-ok">Potvrdiť</button>
                 </div>
             </div>
         </div>
@@ -530,12 +534,6 @@ class KASS_Vylep_Public {
             $pocet = count( array_filter( explode( ',', $v->plochy_vyber ?? '' ) ) );
             $plochy_label = $pocet . ' pl.';
         }
-        $plochy_opts = '
-      <div class="kp-plochy-opt" data-val="vsetky">26 (všetky)</div>
-      <div class="kp-plochy-opt" data-val="top10">TOP 10</div>
-      <div class="kp-plochy-opt" data-val="top15">TOP 15</div>
-      <div class="kp-plochy-opt" data-val="top20">TOP 20</div>
-      <div class="kp-plochy-opt kp-plochy-opt-vyber" data-val="vyber">Vybrať plochy…</div>';
 
         $f2 = function( $n ) { return $n > 0 ? number_format( $n, 2, ',', ' ' ) . ' €' : '—'; };
         $fakt_url = admin_url( 'admin.php?page=kass-faktura&vylep=' . $id );
@@ -560,10 +558,9 @@ class KASS_Vylep_Public {
   </td>
   <td>
     <div class=\"kp-plochy-wrap\">
-      <div class=\"kp-plochy-btn\" data-val=\"$plochy_sposob\">$plochy_label</div>
+      <div class=\"kp-plochy-btn\" data-val=\"$plochy_sposob\" title=\"Priradiť plochy\">$plochy_label</div>
       <input type=\"hidden\" class=\"kp-plochy-sposob\" name=\"plochy_sposob\" value=\"$plochy_sposob\">
       <input type=\"hidden\" class=\"kp-plochy-vyber\" name=\"plochy_vyber\" value=\"$plochy_vyber\">
-      <div class=\"kp-plochy-drop\">$plochy_opts</div>
     </div>
   </td>
   <td>
