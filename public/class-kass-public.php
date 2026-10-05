@@ -329,6 +329,9 @@ class KASS_Vylep_Public {
 
             </div><!-- .kp-sticky-top -->
 
+            <!-- Telo: tabuľka a (cez ňu) schéma plôch -->
+            <div class="kp-body">
+
             <!-- Tabuľka -->
             <div class="kp-table-wrap">
                 <table class="kp-table" id="kp-table">
@@ -368,6 +371,8 @@ class KASS_Vylep_Public {
                 <div class="kp-plochy-selector" id="kp-plochy-selector"></div>
                 <div class="kp-plochy-detail" id="kp-plochy-detail"></div>
             </div>
+
+            </div><!-- .kp-body -->
 
             <?php printf( "<!-- kass-vylep: %d riadkov, generovanie tabuľky %d ms, %d kB HTML -->\n", $celkom, round( ( microtime( true ) - $t_start ) * 1000 ), round( strlen( $older_html ) / 1024 ) ); ?>
             <?php if ( $older_html !== '' ) : ?>

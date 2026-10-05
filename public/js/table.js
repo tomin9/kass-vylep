@@ -757,11 +757,8 @@
     function setActiveTab(name) {
         $('#kp-tabs .kp-tab').removeClass('active').filter('[data-tab="' + name + '"]').addClass('active');
     }
-    var tabulkaScroll = 0;
     function openPlochyTab() {
         if (plochyTabOpen) { return; }
-        var w = document.querySelector('.kp-table-wrap');
-        tabulkaScroll = w ? w.scrollTop : 0;   // skrytý prvok stratí pozíciu scrollu
         plochyTabOpen = true;
         setActiveTab('plochy');
         $('#kp-app').addClass('kp-view-plochy');
@@ -769,12 +766,10 @@
         fetchObsadenost(function () { renderPlochyDetail(plochySelectedId); });
     }
     function closePlochyTab() {
-        var bola = plochyTabOpen;
         plochyTabOpen = false;
         setActiveTab('tabulka');
         $('#kp-app').removeClass('kp-view-plochy');
-        var w = document.querySelector('.kp-table-wrap');
-        if (bola && w) { w.scrollTop = tabulkaScroll; }
+
     }
 
     /* ===== INIT ===== */
@@ -1306,6 +1301,7 @@
         document.addEventListener('wheel', function (e) {
             var wrap = document.querySelector('.kp-table-wrap');
             if (!wrap) { return; }
+            if (plochyTabOpen) { return; }           // schéma plôch si scrolluje samostatne
             if (wrap.contains(e.target)) { return; } // vnútri tabuľky funguje natívne
             if (e.target.closest && e.target.closest('.kp-modal-overlay, .kp-tlac-modal, .kp-ac-drop, .kp-platba-drop, .kp-fmt-drop, .flatpickr-calendar')) { return; }
             wrap.scrollTop += e.deltaY;
