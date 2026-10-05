@@ -80,6 +80,12 @@ class KASS_Vylep_Public {
         echo '<script id="kass-plagat-js">window.KASSPub = ' . $data . ";\n" . $js . "\n</script>\n";
     }
 
+    /** Kam presmerovať po prihlásení/odhlásení (pri hooku init ešte nie je známy get_permalink()). */
+    private function redirect_back() {
+        $back = isset( $_REQUEST['kass_back'] ) ? esc_url_raw( wp_unslash( $_REQUEST['kass_back'] ) ) : '';
+        return $back ? $back : home_url( '/' );
+    }
+
     public function handle_login() {
         if ( ! isset( $_POST['kass_login_nonce'] ) || ! wp_verify_nonce( $_POST['kass_login_nonce'], 'kass_login' ) ) { return; }
         $creds = array(
@@ -91,14 +97,16 @@ class KASS_Vylep_Public {
         if ( is_wp_error( $user ) ) {
             set_transient( 'kass_login_err_' . md5( $_SERVER['REMOTE_ADDR'] ), 'Nesprávne meno alebo heslo.', 30 );
         }
-        wp_safe_redirect( get_permalink() );
+        nocache_headers();
+        wp_safe_redirect( $this->redirect_back() );
         exit;
     }
 
     public function handle_logout() {
         if ( isset( $_GET['kass_logout'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'kass_logout' ) ) {
             wp_logout();
-            wp_safe_redirect( get_permalink() );
+            nocache_headers();
+            wp_safe_redirect( $this->redirect_back() );
             exit;
         }
     }
@@ -187,6 +195,7 @@ class KASS_Vylep_Public {
                 <?php if ( $chyba ) : ?><div class="kp-error"><?php echo esc_html( $chyba ); ?></div><?php endif; ?>
                 <form method="post" class="kp-login-form">
                     <?php wp_nonce_field( 'kass_login', 'kass_login_nonce' ); ?>
+                    <input type="hidden" name="kass_back" value="<?php echo esc_attr( get_permalink() ); ?>">
                     <div class="kp-field"><label>Používateľské meno</label><input type="text" name="kass_user" autocomplete="username" required value="<?php echo esc_attr( $_POST['kass_user'] ?? '' ); ?>"></div>
                     <div class="kp-field"><label>Heslo</label><input type="password" name="kass_pass" autocomplete="current-password" required></div>
                     <div class="kp-field-check"><input type="checkbox" name="kass_remember" id="kp_rem" value="1"><label for="kp_rem">Zapamätať si ma</label></div>
@@ -203,7 +212,7 @@ class KASS_Vylep_Public {
         $user    = wp_get_current_user();
         $rok     = isset( $_GET['rok'] ) ? (int) $_GET['rok'] : (int) date( 'Y' );
         $vylepy  = KASS_Vylep_DB::get_vylepy( array( 'rok' => $rok ) );
-        $logout_url = wp_nonce_url( add_query_arg( 'kass_logout', '1', get_permalink() ), 'kass_logout' );
+        $logout_url = wp_nonce_url( add_query_arg( array( 'kass_logout' => '1', 'kass_back' => rawurlencode( get_permalink() ) ), get_permalink() ), 'kass_logout' );
 
         // Zoznam organizácií pre filter
         $orgs = KASS_Vylep_DB::get_organizacie();
@@ -380,7 +389,8 @@ class KASS_Vylep_Public {
                 var odEl = tr.querySelector('.kp-od');
                 var od = odEl ? odEl.value : '';
                 if (!doVal) return;
-                var isPaid = (platba === 'H' || platba === 'FA' || platba === 'K');
+                var platbaSkr = ({'Hotovosť':'H','Faktúra':'FA','Karta':'K','Zadarmo':'Z'})[platba] || platba;
+                var isPaid = (platbaSkr === 'H' || platbaSkr === 'FA' || platbaSkr === 'K');
                 var item = { fmt: fmt, org: org, akcia: akcia, od: od, do: doVal };
                 if (doVal === thisTueStr && isPaid) prelepit.push(item);
                 else if (doVal > thisTueStr && od !== thisTueStr) neprelepit.push(item);
@@ -539,16 +549,7 @@ class KASS_Vylep_Public {
 
         $platba_skr = array( 'Faktúra' => 'FA', 'Zadarmo' => 'Z', 'Hotovosť' => 'H', 'Karta' => 'K' );
         $platba_label = isset( $platba_skr[ $platba ] ) ? $platba_skr[ $platba ] : 'Z';
-        $platba_drop_html = '';
-        foreach ( $platba_skr as $pn => $ps ) {
-            $platba_drop_html .= "<div class=\"kp-platba-opt\" data-val=\"$ps\" data-full=\"" . esc_attr( $pn ) . "\"><span class=\"kp-platba-skr\">$ps</span>" . esc_html( $pn ) . "</div>";
-        }
-        $fmt_opts = '';
         $current_fmt = $v->format ?? 'A3';
-        foreach ( array( 'A4', 'A3', 'A2', 'A1' ) as $f ) {
-            $fmt_opts .= "<div class=\"kp-fmt-opt\" data-val=\"$f\">$f</div>";
-        }
-
         $orient = ( ( $v->orientacia ?? 'v' ) === 's' ) ? 's' : 'v';
         $orient_tit = $orient === 's' ? 'Na šírku' : 'Na výšku';
 
@@ -562,14 +563,14 @@ class KASS_Vylep_Public {
         $fakt_url = admin_url( 'admin.php?page=kass-faktura&vylep=' . $id );
 
         $mes_od = $datum_od ? (int) date('n', strtotime($datum_od)) : 0;
-        return "
+        $html = "
 <tr data-id=\"$id\" data-org=\"$org_nazov\" data-mes=\"$mes_od\" class=\"kp-row\">
   <td class=\"kp-num\"><span class=\"kp-num-edit\" contenteditable=\"true\">$i</span>.</td>
   <td>
     <div class=\"kp-platba-wrap\">
       <div class=\"kp-platba-btn\" data-val=\"$platba_label\" data-full=\"$platba\">$platba_label</div>
       <input type=\"hidden\" class=\"kp-platba-hidden\" name=\"platba\" value=\"$platba\">
-      <div class=\"kp-platba-drop\">$platba_drop_html</div>
+      <div class=\"kp-platba-drop\"></div>
     </div>
   </td>
   <td>
@@ -577,7 +578,7 @@ class KASS_Vylep_Public {
       <div class=\"kp-fmt-wrap\">
         <div class=\"kp-fmt-btn\">$current_fmt</div>
         <input type=\"hidden\" class=\"kp-format\" name=\"format\" value=\"$current_fmt\">
-        <div class=\"kp-fmt-drop\">$fmt_opts</div>
+        <div class=\"kp-fmt-drop\"></div>
       </div>
       <button type=\"button\" class=\"kp-orient-btn\" data-val=\"$orient\" title=\"$orient_tit — klik pre zmenu\"></button>
       <input type=\"hidden\" class=\"kp-orient\" name=\"orientacia\" value=\"$orient\">
@@ -619,5 +620,7 @@ class KASS_Vylep_Public {
     <button type=\"button\" class=\"kp-btn-del\" title=\"Zmazať\">✕</button>
   </td>
 </tr>";
+        // Kompaktné HTML: bez odsadenia a zalomení medzi značkami (stovky riadkov = menší prenos a rýchlejšie parsovanie)
+        return preg_replace( '/>\s+</', '><', trim( $html ) );
     }
 }
