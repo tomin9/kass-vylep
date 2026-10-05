@@ -501,6 +501,7 @@ class KASS_Vylep_Public {
                     <button type="button" class="kp-plochy-mode-btn" data-val="vyber">Vybrať konkrétne</button>
                 </div>
                 <div class="kp-plochy-picker-grid" id="kp-plochy-picker-grid" style="display:none;"></div>
+                <div class="kp-plochy-count" id="kp-plochy-count"></div>
                 <div class="kp-tlac-btns">
                     <button type="button" class="kp-tlac-cancel" id="kp-plochy-cancel">Zrušiť</button>
                     <button type="button" class="kp-tlac-confirm" id="kp-plochy-ok">Potvrdiť</button>
@@ -555,13 +556,6 @@ class KASS_Vylep_Public {
             $plochy_sposob = 'vsetky';
         }
         $plochy_vyber = esc_attr( $v->plochy_vyber ?? '' );
-        $plochy_labels = array( 'vsetky' => '26', 'top10' => 'T10', 'top15' => 'T15', 'top20' => 'T20' );
-        if ( isset( $plochy_labels[ $plochy_sposob ] ) ) {
-            $plochy_label = $plochy_labels[ $plochy_sposob ];
-        } else {
-            $pocet = count( array_filter( explode( ',', $v->plochy_vyber ?? '' ) ) );
-            $plochy_label = $pocet . ' pl.';
-        }
 
         $f2 = function( $n ) { return $n > 0 ? number_format( $n, 2, ',', ' ' ) . ' €' : '—'; };
         $fakt_url = admin_url( 'admin.php?page=kass-faktura&vylep=' . $id );
@@ -604,7 +598,7 @@ class KASS_Vylep_Public {
     <div class=\"kp-kusy-wrap\">
       <input type=\"number\" class=\"kp-inp kp-kusy\" name=\"kusy\" value=\"$kusy\" min=\"0\">
       <div class=\"kp-plochy-wrap\">
-        <div class=\"kp-plochy-btn\" data-val=\"$plochy_sposob\" title=\"Priradiť plochy\">$plochy_label</div>
+        <div class=\"kp-plochy-btn\" data-val=\"$plochy_sposob\" title=\"Priradiť plochy\">📍</div>
         <input type=\"hidden\" class=\"kp-plochy-sposob\" name=\"plochy_sposob\" value=\"$plochy_sposob\">
         <input type=\"hidden\" class=\"kp-plochy-vyber\" name=\"plochy_vyber\" value=\"$plochy_vyber\">
       </div>
