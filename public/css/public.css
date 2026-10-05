@@ -672,7 +672,10 @@ input[type="number"].kp-inp { text-align: center; }
     text-align: center; color: #fff; font-weight: 600; line-height: 1.2;
     overflow: hidden; word-break: break-word;
 }
-.kp-pl-txt-in { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; max-width: 100%; }
+.kp-pl-txt-in { max-width: 100%; overflow: hidden; }
+.kp-pl-org, .kp-pl-akcia { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+.kp-pl-org { font-weight: 800; }
+.kp-pl-akcia { font-weight: 500; opacity: .92; margin-top: 1px; }
 
 /* ===== PLOCHY — výber konkrétnych plôch (modal) ===== */
 .kp-plochy-picker-grid {

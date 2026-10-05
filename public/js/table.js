@@ -664,7 +664,7 @@
                 var i = pocitadlo[c.k] = (pocitadlo[c.k] || 0);
                 pocitadlo[c.k]++;
                 var it = (items[c.k] || [])[i] || {};
-                var text = (it.o ? it.o + ': ' : '') + (it.a || '');
+                var text = (it.o ? it.o : '') + (it.a ? ': ' + it.a : '');
                 var fs = c.w >= 99 ? 8 : (c.w >= 70 ? 7 : 5.6);
                 var lines = Math.max(1, Math.floor((c.h - 4) / (fs * 1.2)));
                 var fo = document.createElementNS(ns, 'foreignObject');
@@ -674,10 +674,21 @@
                 d.setAttribute('class', 'kp-pl-txt');
                 d.setAttribute('title', PLOCHY_NAZVY[c.k] + ' — ' + text);
                 d.style.fontSize = fs + 'px';
+                var orgLines = lines >= 5 ? 2 : 1;
                 var inner = document.createElementNS(xh, 'div');
                 inner.setAttribute('class', 'kp-pl-txt-in');
-                inner.style.webkitLineClamp = lines;
-                inner.textContent = text || PLOCHY_NAZVY[c.k];
+                var oEl = document.createElementNS(xh, 'div');
+                oEl.setAttribute('class', 'kp-pl-org');
+                oEl.style.webkitLineClamp = orgLines;
+                oEl.textContent = it.o || PLOCHY_NAZVY[c.k];
+                inner.appendChild(oEl);
+                if (it.a) {
+                    var aEl = document.createElementNS(xh, 'div');
+                    aEl.setAttribute('class', 'kp-pl-akcia');
+                    aEl.style.webkitLineClamp = Math.max(1, lines - orgLines);
+                    aEl.textContent = it.a;
+                    inner.appendChild(aEl);
+                }
                 d.appendChild(inner);
                 fo.appendChild(d);
                 svg.appendChild(fo);
