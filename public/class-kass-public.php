@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 class KASS_Vylep_Public {
 
     /** Koľko najnovších riadkov sa vykreslí okamžite (zvyšok sa dopĺňa na pozadí). */
-    const RIADKOV_HNED = 60;
+    const RIADKOV_HNED = 30;
 
     public function hooks() {
         add_shortcode( 'kass_plagat', array( $this, 'shortcode' ) );
