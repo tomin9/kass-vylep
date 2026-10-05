@@ -645,13 +645,14 @@
         return { cells: cells, over: over, width: m * PL.VW, used: used, cap: m };
     }
 
-    function plochySvg(top, bot) {
+    function plochySvg(top, bot, items) {
         var W = Math.max(top.width, bot.width, 1), H = PL.UH + PL.VH;
-        var ns = 'http://www.w3.org/2000/svg';
+        var ns = 'http://www.w3.org/2000/svg', xh = 'http://www.w3.org/1999/xhtml';
         var svg = document.createElementNS(ns, 'svg');
         svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
         svg.setAttribute('class', 'kp-plochy-svg');
         svg.style.width = 'min(100%, ' + Math.round(W * 1.7) + 'px)';
+        var pocitadlo = {};
         function add(cells, dy) {
             cells.forEach(function (c) {
                 var r = document.createElementNS(ns, 'rect');
@@ -659,13 +660,27 @@
                 r.setAttribute('width', c.w); r.setAttribute('height', c.h);
                 r.setAttribute('class', 'kp-pl-cell kp-pl-' + c.k);
                 svg.appendChild(r);
-                if (c.k !== 'free') {
-                    var t = document.createElementNS(ns, 'text');
-                    t.setAttribute('x', c.x + c.w / 2); t.setAttribute('y', c.y + dy + c.h / 2);
-                    t.setAttribute('class', 'kp-pl-label');
-                    t.textContent = c.k.substring(0, 2);
-                    svg.appendChild(t);
-                }
+                if (c.k === 'free') { return; }
+                var i = pocitadlo[c.k] = (pocitadlo[c.k] || 0);
+                pocitadlo[c.k]++;
+                var it = (items[c.k] || [])[i] || {};
+                var text = (it.o ? it.o + ': ' : '') + (it.a || '');
+                var fs = c.w >= 99 ? 8 : (c.w >= 70 ? 7 : 5.6);
+                var lines = Math.max(1, Math.floor((c.h - 4) / (fs * 1.2)));
+                var fo = document.createElementNS(ns, 'foreignObject');
+                fo.setAttribute('x', c.x); fo.setAttribute('y', c.y + dy);
+                fo.setAttribute('width', c.w); fo.setAttribute('height', c.h);
+                var d = document.createElementNS(xh, 'div');
+                d.setAttribute('class', 'kp-pl-txt');
+                d.setAttribute('title', PLOCHY_NAZVY[c.k] + ' — ' + text);
+                d.style.fontSize = fs + 'px';
+                var inner = document.createElementNS(xh, 'div');
+                inner.setAttribute('class', 'kp-pl-txt-in');
+                inner.style.webkitLineClamp = lines;
+                inner.textContent = text || PLOCHY_NAZVY[c.k];
+                d.appendChild(inner);
+                fo.appendChild(d);
+                svg.appendChild(fo);
             });
         }
         add(top.cells, 0);
@@ -680,8 +695,9 @@
         var $detail = $('#kp-plochy-detail').empty();
         if (!p) { return; }
 
-        var c = $.extend({ A1v: 0, A2s: 0, A3v: 0, A2v: 0, A3s: 0, A1s: 0, A4: 0 },
-                         (plochyObsadenost && plochyObsadenost[plochaId]) || {});
+        var items = (plochyObsadenost && plochyObsadenost[plochaId]) || {};
+        var c = {};
+        ['A1v', 'A2s', 'A3v', 'A2v', 'A3s', 'A1s', 'A4'].forEach(function (k) { c[k] = (items[k] || []).length; });
 
         $detail.append($('<div class="kp-plochy-rect-title"></div>').text(p.cislo + '. ' + (p.nazov || '')));
 
@@ -709,7 +725,7 @@
         });
         if ($cnt.children().length) { $detail.append($cnt); }
 
-        $detail.append($('<div class="kp-plochy-board"></div>').append(plochySvg(top, bot)));
+        $detail.append($('<div class="kp-plochy-board"></div>').append(plochySvg(top, bot, items)));
     }
 
     function openPlochyTab() {
