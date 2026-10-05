@@ -435,7 +435,7 @@ input[type="number"].kp-inp { text-align: center; }
     }
     .kp-app { display: block !important; }
     .kp-plochy-view { display: none !important; }
-    .kp-table-wrap { overflow: visible; display: block !important; height: auto !important; box-shadow: none; border: none; border-radius: 0; }
+    .kp-table-wrap { overflow: visible; display: block !important; height: auto !important; visibility: visible !important; box-shadow: none; border: none; border-radius: 0; }
     .kp-table { background: #fff !important; font-size: 8pt; }
     .kp-table thead th { background: #1a1a1a !important; color: #fff !important; font-size: 7.5pt; padding: 4px 3px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     /* Sticky panel je pri tlači skrytý — obnov hlavičku stĺpcov v tabuľke */
@@ -648,8 +648,10 @@ input[type="number"].kp-inp { text-align: center; }
 .kp-app.kp-view-plochy .kp-filter-wrap { display: none; }
 
 /* ===== ZÁLOŽKA PLOCHY ===== */
+.kp-body { flex: 1 1 auto; min-height: 0; position: relative; display: flex; flex-direction: column; }
 .kp-plochy-view {
     display: none;
+    position: absolute; inset: 0; z-index: 3; background: #121212 !important;
     flex: 1 1 auto; min-height: 0;
     overflow-y: auto;
     border-radius: 10px;
@@ -659,8 +661,9 @@ input[type="number"].kp-inp { text-align: center; }
     padding: 16px;
 }
 /* !important + vyššia špecificita: prebije aj starú CSS poistku v téme (.kp-table-wrap { display:flex !important }) */
-.kp-app.kp-view-plochy .kp-head-wrap,
-.kp-app.kp-view-plochy .kp-table-wrap { display: none !important; }
+.kp-app.kp-view-plochy .kp-head-wrap { display: none !important; }
+/* Tabuľka sa vôbec neskrýva — schéma plôch (nepriehľadná) sa položí cez ňu. Prepnutie je tak len
+   prekreslenie: skrytie/zmena viditeľnosti by prinútilo prehliadač prepočítať štýly stoviek riadkov. */
 .kp-app.kp-view-plochy .kp-plochy-view { display: block !important; }
 
 .kp-plochy-selector { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
