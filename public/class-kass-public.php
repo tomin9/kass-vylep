@@ -19,13 +19,19 @@ class KASS_Vylep_Public {
         return is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'kass_plagat' );
     }
 
+    /** Dáta pre JS (KASSPub) — plnia sa v assets(), vypíšu sa v pätičke. */
+    private $js_data = null;
+
     public function assets() {
         if ( ! $this->is_plagat_page() ) { return; }
         wp_enqueue_style( 'flatpickr', 'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css', array(), '4.6.13' );
-        wp_enqueue_style( 'kass-plagat-public', KASS_VYLEP_URL . 'public/css/public.css', array(), KASS_VYLEP_VERSION );
+        // CSS a JS pluginu sa vkladajú priamo do HTML stránky (nie ako samostatné
+        // súbory) — cache pluginy ich tak nevedia zlúčiť/zdržať a po aktualizácii
+        // pluginu je vždy aktuálna verzia.
+        add_action( 'wp_head', array( $this, 'print_inline_css' ), 100 );
         if ( is_user_logged_in() ) {
             wp_enqueue_script( 'flatpickr', 'https://cdn.jsdelivr.net/npm/flatpickr', array(), '4.6.13', true );
-            wp_enqueue_script( 'kass-plagat-js', KASS_VYLEP_URL . 'public/js/table.js', array( 'jquery', 'flatpickr' ), KASS_VYLEP_VERSION, true );
+            wp_enqueue_script( 'jquery' );
             $orgs = KASS_Vylep_DB::get_organizacie();
             $org_list = array();
             foreach ( $orgs as $o ) {
@@ -49,7 +55,7 @@ class KASS_Vylep_Public {
                     'sloty'  => $sloty_podla[ (int) $p->id ] ?? array(),
                 );
             }
-            wp_localize_script( 'kass-plagat-js', 'KASSPub', array(
+            $this->js_data = array(
                 'ajax'      => admin_url( 'admin-ajax.php' ),
                 'nonce'     => wp_create_nonce( 'kass_pub' ),
                 'orgs'      => $org_list,
@@ -57,8 +63,22 @@ class KASS_Vylep_Public {
                 'faktUrl'   => admin_url( 'admin.php?page=kass-faktura&vylep=' ),
                 'tlacCennik' => KASS_Vylep_Cennik::get_tlac_matrix(),
                 'plochy'    => $plochy_list,
-            ) );
+            );
+            // Po wp_print_footer_scripts (priorita 20), takže jQuery a flatpickr sú už načítané
+            add_action( 'wp_footer', array( $this, 'print_inline_js' ), 100 );
         }
+    }
+
+    public function print_inline_css() {
+        $css = file_get_contents( KASS_VYLEP_PATH . 'public/css/public.css' );
+        echo '<style id="kass-plagat-public-css">' . $css . "</style>\n";
+    }
+
+    public function print_inline_js() {
+        if ( $this->js_data === null ) { return; }
+        $js   = file_get_contents( KASS_VYLEP_PATH . 'public/js/table.js' );
+        $data = wp_json_encode( $this->js_data, JSON_HEX_TAG | JSON_HEX_AMP );
+        echo '<script id="kass-plagat-js">window.KASSPub = ' . $data . ";\n" . $js . "\n</script>\n";
     }
 
     public function handle_login() {
