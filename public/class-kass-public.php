@@ -11,6 +11,7 @@ class KASS_Vylep_Public {
         add_action( 'wp_ajax_kass_pub_save_vylep',   array( $this, 'ajax_save_vylep' ) );
         add_action( 'wp_ajax_kass_pub_delete_vylep', array( $this, 'ajax_delete_vylep' ) );
         add_action( 'wp_ajax_kass_pub_save_org',     array( $this, 'ajax_save_org' ) );
+        add_action( 'wp_ajax_kass_pub_get_obsadenost', array( $this, 'ajax_get_obsadenost' ) );
     }
 
     private function is_plagat_page() {
@@ -34,6 +35,20 @@ class KASS_Vylep_Public {
                     'nazov'     => $o->nazov,
                 );
             }
+            $sloty_podla = KASS_Vylep_Plochy::get_sloty_vsetky();
+            $plochy_list = array();
+            foreach ( KASS_Vylep_Plochy::get_all() as $p ) {
+                $plochy_list[] = array(
+                    'id'     => (int) $p->id,
+                    'cislo'  => (int) $p->cislo,
+                    'nazov'  => $p->nazov,
+                    'top10'  => (bool) $p->top10,
+                    'top15'  => (bool) $p->top15,
+                    'top20'  => (bool) $p->top20,
+                    'mriezkaStlpcov' => (int) $p->mriezka_stlpcov,
+                    'sloty'  => $sloty_podla[ (int) $p->id ] ?? array(),
+                );
+            }
             wp_localize_script( 'kass-plagat-js', 'KASSPub', array(
                 'ajax'      => admin_url( 'admin-ajax.php' ),
                 'nonce'     => wp_create_nonce( 'kass_pub' ),
@@ -41,6 +56,7 @@ class KASS_Vylep_Public {
                 'cennik'    => KASS_Vylep_Cennik::get_js_matrix(),
                 'faktUrl'   => admin_url( 'admin.php?page=kass-faktura&vylep=' ),
                 'tlacCennik' => KASS_Vylep_Cennik::get_tlac_matrix(),
+                'plochy'    => $plochy_list,
             ) );
         }
     }
@@ -89,10 +105,18 @@ class KASS_Vylep_Public {
             'tlac_bez_dph'      => $_POST['tlac_bez_dph'] ?? 0,
             'ine'               => $_POST['ine'] ?? 0,
             'poznamka'          => $_POST['poznamka'] ?? '',
+            'plochy_sposob'     => $_POST['plochy_sposob'] ?? 'vsetky',
+            'plochy_vyber'      => $_POST['plochy_vyber'] ?? '',
         );
         $new_id = KASS_Vylep_DB::save_vylep( $data, $id );
         $row    = KASS_Vylep_DB::get_vylep( $new_id );
         wp_send_json_success( array( 'id' => $new_id, 'row' => $row ) );
+    }
+
+    public function ajax_get_obsadenost() {
+        check_ajax_referer( 'kass_pub', 'nonce' );
+        if ( ! is_user_logged_in() ) { wp_send_json_error( 'Nie ste prihlásený.' ); }
+        wp_send_json_success( KASS_Vylep_Plochy::obsadenost_vsetky() );
     }
 
     public function ajax_delete_vylep() {
@@ -233,6 +257,7 @@ class KASS_Vylep_Public {
                     <span id="kp-status" class="kp-status"></span>
                     <span id="kp-count" class="kp-count"></span>
                     <button id="kp-btn-vylep-list" class="kp-btn-print" type="button" onclick="kassVylepList()">📋 Výlep</button>
+                    <button id="kp-btn-plochy" class="kp-btn-print" type="button">🧱 Plochy</button>
                     <button class="kp-btn-print" onclick="window.print()" type="button">🖨 Tlačiť</button>
                 </div>
             </div>
@@ -242,6 +267,7 @@ class KASS_Vylep_Public {
                 <th class="kp-th-num">Č.</th>
                 <th class="kp-th-platba">Platba</th>
                 <th class="kp-th-fmt">Formát</th>
+                <th class="kp-th-plochy">Plochy</th>
                 <th class="kp-th-org">Organizácia</th>
                 <th class="kp-th-akcia">Názov akcie</th>
                 <th class="kp-th-date">Od</th>
@@ -282,7 +308,7 @@ class KASS_Vylep_Public {
                     </tbody>
                     <tfoot>
                         <tr id="kp-sum-row">
-                            <td colspan="10" class="kp-sum-label">Spolu:</td>
+                            <td colspan="11" class="kp-sum-label">Spolu:</td>
                             <td class="kp-sum" id="kp-sum-vylep">—</td>
                             <td class="kp-sum" id="kp-sum-tlac">—</td>
                             <td class="kp-sum" id="kp-sum-ine">—</td>
@@ -294,6 +320,12 @@ class KASS_Vylep_Public {
                         </tr>
                     </tfoot>
                 </table>
+            </div>
+
+            <!-- Plochy (vizualizácia obsadenosti) -->
+            <div class="kp-plochy-view" id="kp-plochy-view">
+                <div class="kp-plochy-selector" id="kp-plochy-selector"></div>
+                <div class="kp-plochy-detail" id="kp-plochy-detail"></div>
             </div>
 
         </div><!-- .kp-app -->
@@ -432,6 +464,21 @@ class KASS_Vylep_Public {
                 <iframe class="kp-modal-iframe" id="kp-fakt-iframe" src="about:blank"></iframe>
             </div>
         </div>
+
+        <!-- Výber konkrétnych plôch -->
+        <div class="kp-modal-overlay" id="kp-plochy-picker-modal">
+            <div class="kp-modal-box" style="max-width:480px;height:auto;max-height:80vh;">
+                <div class="kp-modal-bar" style="justify-content:space-between;padding:8px 14px;">
+                    <span style="color:#fff;font-size:13px;font-weight:600;">Vybrať konkrétne plochy</span>
+                    <button type="button" id="kp-plochy-picker-close" class="kp-modal-close">✕</button>
+                </div>
+                <div class="kp-plochy-picker-grid" id="kp-plochy-picker-grid"></div>
+                <div class="kp-plochy-picker-btns">
+                    <button type="button" class="kp-tlac-cancel" id="kp-plochy-picker-cancel">Zrušiť</button>
+                    <button type="button" class="kp-tlac-confirm" id="kp-plochy-picker-ok">Potvrdiť</button>
+                </div>
+            </div>
+        </div>
         <?php
     }
 
@@ -471,6 +518,25 @@ class KASS_Vylep_Public {
             $fmt_opts .= "<div class=\"kp-fmt-opt\" data-val=\"$f\">$f</div>";
         }
 
+        $plochy_sposob = $v->plochy_sposob ?? 'vsetky';
+        if ( ! in_array( $plochy_sposob, array( 'vsetky', 'top10', 'top15', 'top20', 'vyber' ), true ) ) {
+            $plochy_sposob = 'vsetky';
+        }
+        $plochy_vyber = esc_attr( $v->plochy_vyber ?? '' );
+        $plochy_labels = array( 'vsetky' => '26', 'top10' => 'T10', 'top15' => 'T15', 'top20' => 'T20' );
+        if ( isset( $plochy_labels[ $plochy_sposob ] ) ) {
+            $plochy_label = $plochy_labels[ $plochy_sposob ];
+        } else {
+            $pocet = count( array_filter( explode( ',', $v->plochy_vyber ?? '' ) ) );
+            $plochy_label = $pocet . ' pl.';
+        }
+        $plochy_opts = '
+      <div class="kp-plochy-opt" data-val="vsetky">26 (všetky)</div>
+      <div class="kp-plochy-opt" data-val="top10">TOP 10</div>
+      <div class="kp-plochy-opt" data-val="top15">TOP 15</div>
+      <div class="kp-plochy-opt" data-val="top20">TOP 20</div>
+      <div class="kp-plochy-opt kp-plochy-opt-vyber" data-val="vyber">Vybrať plochy…</div>';
+
         $f2 = function( $n ) { return $n > 0 ? number_format( $n, 2, ',', ' ' ) . ' €' : '—'; };
         $fakt_url = admin_url( 'admin.php?page=kass-faktura&vylep=' . $id );
 
@@ -490,6 +556,14 @@ class KASS_Vylep_Public {
       <div class=\"kp-fmt-btn\">$current_fmt</div>
       <input type=\"hidden\" class=\"kp-format\" name=\"format\" value=\"$current_fmt\">
       <div class=\"kp-fmt-drop\">$fmt_opts</div>
+    </div>
+  </td>
+  <td>
+    <div class=\"kp-plochy-wrap\">
+      <div class=\"kp-plochy-btn\" data-val=\"$plochy_sposob\">$plochy_label</div>
+      <input type=\"hidden\" class=\"kp-plochy-sposob\" name=\"plochy_sposob\" value=\"$plochy_sposob\">
+      <input type=\"hidden\" class=\"kp-plochy-vyber\" name=\"plochy_vyber\" value=\"$plochy_vyber\">
+      <div class=\"kp-plochy-drop\">$plochy_opts</div>
     </div>
   </td>
   <td>

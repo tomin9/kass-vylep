@@ -15,6 +15,7 @@ class KASS_Vylep_Admin {
         add_action( 'admin_post_kass_save_org',    array( $this, 'handle_save_org' ) );
         add_action( 'admin_post_kass_delete_org',  array( $this, 'handle_delete_org' ) );
         add_action( 'admin_post_kass_save_cennik', array( $this, 'handle_save_cennik' ) );
+        add_action( 'admin_post_kass_save_plochy', array( $this, 'handle_save_plochy' ) );
         add_action( 'wp_ajax_kass_cena',           array( $this, 'ajax_cena' ) );
     }
 
@@ -98,6 +99,7 @@ window.KASSVylep = { ajax: '<?php echo esc_url( admin_url( 'admin-ajax.php' ) );
         );
         add_submenu_page( 'kass-vylep', 'Odberatelia', 'Odberatelia', self::CAP, 'kass-vylep', array( $this, 'page_organizacie' ) );
         add_submenu_page( 'kass-vylep', 'Cenník', 'Cenník', self::CAP, 'kass-cennik', array( $this, 'page_cennik' ) );
+        add_submenu_page( 'kass-vylep', 'Plochy', 'Plochy', self::CAP, 'kass-plochy', array( $this, 'page_plochy' ) );
         // Skryté stránky — zaregistrované ale nezobrazené v menu
         add_submenu_page( null, 'Odberatelia', '', self::CAP, 'kass-organizacie', array( $this, 'page_organizacie' ) );
         add_submenu_page( null, 'Podklad k faktúre', '', self::CAP, 'kass-faktura', array( $this, 'page_faktura' ) );
@@ -190,6 +192,31 @@ window.KASSVylep = { ajax: '<?php echo esc_url( admin_url( 'admin-ajax.php' ) );
         exit;
     }
 
+    public function handle_save_plochy() {
+        if ( ! current_user_can( self::CAP ) || ! check_admin_referer( 'kass_save_plochy' ) ) {
+            wp_die( 'Neoprávnený prístup.' );
+        }
+        $nazvy  = $_POST['nazov'] ?? array();
+        $top10  = $_POST['top10'] ?? array();
+        $top15  = $_POST['top15'] ?? array();
+        $top20  = $_POST['top20'] ?? array();
+        $sloty  = $_POST['sloty'] ?? array();
+
+        foreach ( KASS_Vylep_Plochy::get_all() as $p ) {
+            $id = (int) $p->id;
+            KASS_Vylep_Plochy::save_plocha( $id, array(
+                'nazov' => $nazvy[ $id ] ?? '',
+                'top10' => isset( $top10[ $id ] ),
+                'top15' => isset( $top15[ $id ] ),
+                'top20' => isset( $top20[ $id ] ),
+            ) );
+            $formaty = isset( $sloty[ $id ] ) ? explode( ',', (string) $sloty[ $id ] ) : array();
+            KASS_Vylep_Plochy::save_sloty( $id, $formaty );
+        }
+        wp_safe_redirect( admin_url( 'admin.php?page=kass-plochy&msg=saved' ) );
+        exit;
+    }
+
     /** AJAX: vráti cenu za kus pre kategóriu + formát + týždne. */
     public function ajax_cena() {
         check_ajax_referer( 'kass_cena', 'nonce' );
@@ -206,6 +233,9 @@ window.KASSVylep = { ajax: '<?php echo esc_url( admin_url( 'admin-ajax.php' ) );
     }
     public function page_cennik() {
         require KASS_VYLEP_PATH . 'admin/view-cennik.php';
+    }
+    public function page_plochy() {
+        require KASS_VYLEP_PATH . 'admin/view-plochy.php';
     }
     public function page_faktura() {
         require KASS_VYLEP_PATH . 'admin/view-faktura.php';

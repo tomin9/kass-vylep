@@ -9,6 +9,8 @@ class KASS_Vylep_DB {
     public static function t_org()   { global $wpdb; return $wpdb->prefix . 'kass_organizacie'; }
     public static function t_vylep() { global $wpdb; return $wpdb->prefix . 'kass_vylepy'; }
     public static function t_cennik(){ global $wpdb; return $wpdb->prefix . 'kass_cennik'; }
+    public static function t_plochy(){ global $wpdb; return $wpdb->prefix . 'kass_plochy'; }
+    public static function t_plochy_sloty(){ global $wpdb; return $wpdb->prefix . 'kass_plochy_sloty'; }
 
     /**
      * Vytvorenie tabuliek pri aktivácii.
@@ -57,6 +59,8 @@ class KASS_Vylep_DB {
             tlac_bez_dph DECIMAL(10,2) DEFAULT 0,
             ine DECIMAL(10,2) DEFAULT 0,
             poznamka TEXT,
+            plochy_sposob VARCHAR(10) DEFAULT 'vsetky',
+            plochy_vyber VARCHAR(255) DEFAULT '',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             KEY datum_od (datum_od),
@@ -66,6 +70,8 @@ class KASS_Vylep_DB {
         dbDelta( $sql_vylep );
         // Migrácia — pridaj stĺpec ak neexistuje (staršie inštalácie)
         $wpdb->query( "ALTER TABLE $vylep ADD COLUMN IF NOT EXISTS tlac_bez_dph DECIMAL(10,2) DEFAULT 0 AFTER tlac" );
+        $wpdb->query( "ALTER TABLE $vylep ADD COLUMN IF NOT EXISTS plochy_sposob VARCHAR(10) DEFAULT 'vsetky'" );
+        $wpdb->query( "ALTER TABLE $vylep ADD COLUMN IF NOT EXISTS plochy_vyber VARCHAR(255) DEFAULT ''" );
 
         $cennik = self::t_cennik();
         $sql_cennik = "CREATE TABLE $cennik (
@@ -82,6 +88,32 @@ class KASS_Vylep_DB {
             KEY lookup (kategoria, format, tyzdne)
         ) $charset;";
         dbDelta( $sql_cennik );
+
+        $plochy = self::t_plochy();
+        $sql_plochy = "CREATE TABLE $plochy (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            cislo INT NOT NULL DEFAULT 0,
+            nazov VARCHAR(255) DEFAULT '',
+            top10 TINYINT(1) NOT NULL DEFAULT 0,
+            top15 TINYINT(1) NOT NULL DEFAULT 0,
+            top20 TINYINT(1) NOT NULL DEFAULT 0,
+            poradie INT NOT NULL DEFAULT 0,
+            mriezka_stlpcov INT NOT NULL DEFAULT 4,
+            PRIMARY KEY (id),
+            KEY cislo (cislo)
+        ) $charset;";
+        dbDelta( $sql_plochy );
+
+        $plochy_sloty = self::t_plochy_sloty();
+        $sql_plochy_sloty = "CREATE TABLE $plochy_sloty (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            plocha_id BIGINT UNSIGNED NOT NULL,
+            poradie INT NOT NULL DEFAULT 0,
+            format VARCHAR(8) NOT NULL DEFAULT 'A3',
+            PRIMARY KEY (id),
+            KEY plocha_id (plocha_id)
+        ) $charset;";
+        dbDelta( $sql_plochy_sloty );
     }
 
     /* ---------------- ODBERATELIA ---------------- */
@@ -169,6 +201,12 @@ class KASS_Vylep_DB {
         $cena = (float) str_replace( ',', '.', $data['cennik_cena'] );
         $vylep_suma = round( $cena * $kusy, 2 );
 
+        $sposob = $data['plochy_sposob'] ?? 'vsetky';
+        if ( ! in_array( $sposob, array( 'vsetky', 'top10', 'top15', 'top20', 'vyber' ), true ) ) {
+            $sposob = 'vsetky';
+        }
+        $vyber = preg_replace( '/[^0-9,]/', '', (string) ( $data['plochy_vyber'] ?? '' ) );
+
         $fields = array(
             'organizacia_id'    => ! empty( $data['organizacia_id'] ) ? (int) $data['organizacia_id'] : null,
             'organizacia_nazov' => sanitize_text_field( $data['organizacia_nazov'] ),
@@ -186,6 +224,8 @@ class KASS_Vylep_DB {
             'tlac_bez_dph'      => (float) str_replace( ',', '.', $data['tlac_bez_dph'] ?? 0 ),
             'ine'               => (float) str_replace( ',', '.', $data['ine'] ),
             'poznamka'          => sanitize_textarea_field( $data['poznamka'] ),
+            'plochy_sposob'     => $sposob,
+            'plochy_vyber'      => $vyber,
         );
 
         if ( $id ) {

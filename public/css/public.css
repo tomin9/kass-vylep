@@ -260,6 +260,7 @@ body.kp-scroll-lock {
 .kp-th-num   { width: 28px; }
 .kp-th-platba{ width: 50px; }
 .kp-th-fmt   { width: 36px; }
+.kp-th-plochy{ width: 60px; }
 .kp-th-org   { width: 140px; }
 .kp-th-akcia { width: 200px; }
 .kp-th-date  { width: 52px; }
@@ -431,6 +432,7 @@ input[type="number"].kp-inp { text-align: center; }
         background: #fff !important;
     }
     .kp-app { display: block !important; }
+    .kp-plochy-view { display: none !important; }
     .kp-table-wrap { overflow: visible; display: block !important; height: auto !important; box-shadow: none; border: none; border-radius: 0; }
     .kp-table { background: #fff !important; font-size: 8pt; }
     .kp-table thead th { background: #1a1a1a !important; color: #fff !important; font-size: 7.5pt; padding: 4px 3px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -589,6 +591,91 @@ input[type="number"].kp-inp { text-align: center; }
 }
 .kp-fmt-opt:last-child { border-bottom: none; }
 .kp-fmt-opt:hover { background: rgba(255,255,255,.08); }
+
+/* ===== PLOCHY DROPDOWN (rovnaký štýl ako formát/platba) ===== */
+.kp-plochy-wrap { position: relative; display: inline-block; width: 100%; }
+.kp-plochy-btn {
+    width: 100%; text-align: center; cursor: pointer; font-size: 12px;
+    font-weight: 700; padding: 4px 5px; border-radius: 5px;
+    border: 1px solid transparent; color: #e5e7eb;
+    background: transparent; user-select: none;
+}
+.kp-plochy-btn:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.06); }
+.kp-plochy-drop {
+    display: none; position: fixed;
+    z-index: 9999; background: #1c1c1c;
+    border: 1px solid rgba(255,255,255,.15); border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.5); min-width: 150px; overflow: hidden;
+}
+.kp-plochy-drop.open { display: block; }
+.kp-plochy-opt {
+    padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+    color: #e5e7eb; border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.kp-plochy-opt:last-child { border-bottom: none; }
+.kp-plochy-opt:hover { background: rgba(255,255,255,.08); }
+.kp-plochy-opt-vyber { color: #93c5fd; font-style: italic; }
+
+/* ===== ZÁLOŽKA PLOCHY ===== */
+.kp-plochy-view {
+    display: none;
+    flex: 1 1 auto; min-height: 0;
+    overflow-y: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.4);
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(15,15,15,.85);
+    padding: 16px;
+}
+.kp-app.kp-view-plochy .kp-head-wrap,
+.kp-app.kp-view-plochy .kp-table-wrap { display: none; }
+.kp-app.kp-view-plochy .kp-plochy-view { display: block; }
+
+.kp-plochy-selector { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+.kp-plochy-sel-btn {
+    width: 34px; height: 34px; border-radius: 6px; cursor: pointer;
+    background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.12);
+    color: #e5e7eb; font-size: 12px; font-weight: 700;
+}
+.kp-plochy-sel-btn:hover { background: rgba(255,255,255,.12); }
+.kp-plochy-sel-btn.kp-plochy-tag-t20 { border-color: #4ade80; }
+.kp-plochy-sel-btn.kp-plochy-tag-t15 { border-color: #60a5fa; }
+.kp-plochy-sel-btn.kp-plochy-tag-t10 { border-color: #f59e0b; }
+.kp-plochy-sel-btn.active { background: #c0392b; border-color: #c0392b; color: #fff; }
+
+.kp-plochy-rect-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+.kp-plochy-no-sloty { color: rgba(255,255,255,.5); font-style: italic; font-size: 13px; max-width: 420px; }
+.kp-plochy-sum { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.kp-plochy-sum-item {
+    font-size: 12px; font-weight: 700; color: #e5e7eb;
+    background: rgba(255,255,255,.08); border-radius: 6px; padding: 4px 10px;
+}
+.kp-plochy-sum-item.kp-plochy-over { color: #fff; background: rgba(220,38,38,.55); }
+
+.kp-plochy-rect {
+    display: grid; gap: 6px; max-width: 520px;
+}
+.kp-plochy-slot {
+    aspect-ratio: 1 / 1; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: rgba(255,255,255,.5);
+    background: rgba(255,255,255,.04); border: 1.5px dashed rgba(255,255,255,.2);
+}
+.kp-plochy-slot-full {
+    color: #fff; border-style: solid;
+    background: rgba(74,222,128,.25); border-color: rgba(74,222,128,.6);
+}
+.kp-plochy-slot-over {
+    background: rgba(220,38,38,.5); border-color: rgba(220,38,38,.8);
+}
+
+/* ===== PLOCHY — výber konkrétnych plôch (modal) ===== */
+.kp-plochy-picker-grid {
+    padding: 14px 16px; overflow-y: auto; flex: 1 1 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px;
+}
+.kp-plochy-picker-item { color: #e5e7eb; font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.kp-plochy-picker-btns { display: flex; gap: 8px; justify-content: flex-end; padding: 10px 16px; background: #1e1e1e; flex-shrink: 0; }
 
 .kp-btn-vylep-list {
     background: rgba(255,255,255,.1) !important; border: 1px solid rgba(255,255,255,.2) !important;
