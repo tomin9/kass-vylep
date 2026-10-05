@@ -287,13 +287,12 @@ class KASS_Vylep_Public {
                 <th class="kp-th-num">Č.</th>
                 <th class="kp-th-platba">Platba</th>
                 <th class="kp-th-fmt">Formát</th>
-                <th class="kp-th-plochy">Plochy</th>
                 <th class="kp-th-org">Organizácia</th>
                 <th class="kp-th-akcia">Názov akcie</th>
                 <th class="kp-th-date">Od</th>
                 <th class="kp-th-date">Do</th>
                 <th class="kp-th-sm">Týždne</th>
-                <th class="kp-th-sm">Kusy</th>
+                <th class="kp-th-kusy">Kusy</th>
                 <th class="kp-th-num2">Cenník</th>
                 <th class="kp-th-num2">Výlep</th>
                 <th class="kp-th-num2">Tlač</th>
@@ -328,7 +327,7 @@ class KASS_Vylep_Public {
                     </tbody>
                     <tfoot>
                         <tr id="kp-sum-row">
-                            <td colspan="11" class="kp-sum-label">Spolu:</td>
+                            <td colspan="10" class="kp-sum-label">Spolu:</td>
                             <td class="kp-sum" id="kp-sum-vylep">—</td>
                             <td class="kp-sum" id="kp-sum-tlac">—</td>
                             <td class="kp-sum" id="kp-sum-ine">—</td>
@@ -577,13 +576,6 @@ class KASS_Vylep_Public {
     </div>
   </td>
   <td>
-    <div class=\"kp-plochy-wrap\">
-      <div class=\"kp-plochy-btn\" data-val=\"$plochy_sposob\" title=\"Priradiť plochy\">$plochy_label</div>
-      <input type=\"hidden\" class=\"kp-plochy-sposob\" name=\"plochy_sposob\" value=\"$plochy_sposob\">
-      <input type=\"hidden\" class=\"kp-plochy-vyber\" name=\"plochy_vyber\" value=\"$plochy_vyber\">
-    </div>
-  </td>
-  <td>
     <div class=\"kp-ac-wrap\">
       <input type=\"text\" class=\"kp-inp kp-ac-input\" placeholder=\"Začni písať…\" value=\"$org_nazov\" autocomplete=\"off\">
       <input type=\"hidden\" class=\"kp-ac-id\" name=\"organizacia_id\" value=\"$org_id\">
@@ -595,7 +587,16 @@ class KASS_Vylep_Public {
   <td class=\"kp-date-cell\"><span class=\"kp-date-txt kp-od-txt\"></span><input type=\"date\" class=\"kp-date-real kp-od\" name=\"datum_od\" value=\"$datum_od\"></td>
   <td class=\"kp-date-cell\"><span class=\"kp-date-txt kp-do-txt\"></span><input type=\"date\" class=\"kp-date-real kp-do\" name=\"datum_do\" value=\"$datum_do\"></td>
   <td><input type=\"number\" class=\"kp-inp kp-tyzdne\" name=\"tyzdne\" value=\"$tyzdne\" min=\"1\" max=\"20\"></td>
-  <td><input type=\"number\" class=\"kp-inp kp-kusy\" name=\"kusy\" value=\"$kusy\" min=\"0\"></td>
+  <td>
+    <div class=\"kp-kusy-wrap\">
+      <input type=\"number\" class=\"kp-inp kp-kusy\" name=\"kusy\" value=\"$kusy\" min=\"0\">
+      <div class=\"kp-plochy-wrap\">
+        <div class=\"kp-plochy-btn\" data-val=\"$plochy_sposob\" title=\"Priradiť plochy\">$plochy_label</div>
+        <input type=\"hidden\" class=\"kp-plochy-sposob\" name=\"plochy_sposob\" value=\"$plochy_sposob\">
+        <input type=\"hidden\" class=\"kp-plochy-vyber\" name=\"plochy_vyber\" value=\"$plochy_vyber\">
+      </div>
+    </div>
+  </td>
   <td class=\"kp-calc\"><span class=\"kp-cena-val\">" . ( $cena > 0 ? number_format( $cena, 2, ',', ' ' ) . ' €' : '—' ) . "</span><input type=\"hidden\" class=\"kp-cena\" name=\"cennik_cena\" value=\"$cena\"></td>
   <td class=\"kp-calc kp-bold\"><span class=\"kp-vylep-val\">" . $f2( $vylep_s ) . "</span></td>
   <td><input type=\"text\" class=\"kp-inp kp-tlac\" name=\"tlac\" value=\"" . ( $tlac > 0 ? number_format( $tlac, 2, ',', ' ' ) . ' €' : '' ) . "\" placeholder=\"0\"><input type=\"hidden\" class=\"kp-tlac-bez\" value=\"$tlac_bez\"></td>

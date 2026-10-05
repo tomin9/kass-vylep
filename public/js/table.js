@@ -57,6 +57,12 @@
         if (PLOCHY_LABELY[sposob]) { return PLOCHY_LABELY[sposob]; }
         return (vyberCsv || '').split(',').filter(function (s) { return s; }).length + ' pl.';
     }
+    function plochyCount(sposob, vyberCsv) {
+        var all = KP.plochy || [];
+        if (sposob === 'vsetky') { return all.length; }
+        if (sposob === 'vyber')  { return (vyberCsv || '').split(',').filter(function (x) { return x; }).length; }
+        return all.filter(function (p) { return p[sposob]; }).length;
+    }
     function plochyCellHtml(sposob, vyberCsv) {
         sposob = sposob || 'vsetky';
         vyberCsv = vyberCsv || '';
@@ -506,7 +512,6 @@
             + '<td class="kp-num"><span class="kp-num-edit" contenteditable="true">' + num + '</span>.</td>'
             + '<td>' + platbaDropHtml('Zadarmo') + '</td>'
             + '<td>' + fmtDropHtml('A3') + '</td>'
-            + '<td>' + plochyCellHtml('vsetky', '') + '</td>'
             + '<td><div class="kp-ac-wrap">'
             +   '<input type="text" class="kp-inp kp-ac-input" placeholder="Začni písať…" autocomplete="off">'
             +   '<input type="hidden" class="kp-ac-id" value="0">'
@@ -517,7 +522,7 @@
             + '<td class="kp-date-cell"><span class="kp-date-txt kp-od-txt"></span><input type="date" class="kp-date-real kp-od" name="datum_od" value=""></td>'
             + '<td class="kp-date-cell"><span class="kp-date-txt kp-do-txt"></span><input type="date" class="kp-date-real kp-do" name="datum_do" value=""></td>'
             + '<td><input type="number" class="kp-inp kp-tyzdne" name="tyzdne" placeholder="T" min="1" max="20"></td>'
-            + '<td><input type="number" class="kp-inp kp-kusy" name="kusy" placeholder="ks" min="0"></td>'
+            + '<td><div class="kp-kusy-wrap"><input type="number" class="kp-inp kp-kusy" name="kusy" placeholder="ks" min="0">' + plochyCellHtml('vsetky', '') + '</div></td>'
             + '<td class="kp-calc"><span class="kp-cena-val">—</span><input type="hidden" class="kp-cena" value="0"></td>'
             + '<td class="kp-calc kp-bold"><span class="kp-vylep-val">—</span></td>'
             + '<td><input type="text" class="kp-inp kp-tlac" placeholder="0"><input type="hidden" class="kp-tlac-bez" value="0"></td>'
@@ -781,8 +786,12 @@
             $wrap.find('.kp-plochy-btn').text(plochyLabel(plochyMode, csv)).attr('data-val', plochyMode);
             $wrap.find('.kp-plochy-sposob').val(plochyMode);
             $wrap.find('.kp-plochy-vyber').val(csv);
-            scheduleSave($plochyRow);
+            // Kusy = počet vybraných plôch (jeden plagát na plochu); používateľ ich môže potom prepísať
+            var pocet = plochyCount(plochyMode, csv);
+            var $row = $plochyRow;
             plochyClose();
+            if (pocet > 0) { $row.find('.kp-kusy').val(pocet).trigger('change'); }
+            else { scheduleSave($row); }
         });
 
         /* ===== TLAČ MODAL ===== */
