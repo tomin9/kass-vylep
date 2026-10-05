@@ -52,6 +52,28 @@
             + '</div>';
     }
 
+    var PLOCHY_LABELY = { vsetky: '26', top10: 'T10', top15: 'T15', top20: 'T20' };
+    function plochyDropHtml(sposob, vyberCsv) {
+        sposob = sposob || 'vsetky';
+        vyberCsv = vyberCsv || '';
+        var label = PLOCHY_LABELY[sposob];
+        if (!label) {
+            var n = vyberCsv.split(',').filter(function (s) { return s; }).length;
+            label = n + ' pl.';
+        }
+        var opts = '<div class="kp-plochy-opt" data-val="vsetky">26 (všetky)</div>'
+            + '<div class="kp-plochy-opt" data-val="top10">TOP 10</div>'
+            + '<div class="kp-plochy-opt" data-val="top15">TOP 15</div>'
+            + '<div class="kp-plochy-opt" data-val="top20">TOP 20</div>'
+            + '<div class="kp-plochy-opt kp-plochy-opt-vyber" data-val="vyber">Vybrať plochy…</div>';
+        return '<div class="kp-plochy-wrap">'
+            + '<div class="kp-plochy-btn" data-val="' + sposob + '">' + label + '</div>'
+            + '<input type="hidden" class="kp-plochy-sposob" name="plochy_sposob" value="' + sposob + '">'
+            + '<input type="hidden" class="kp-plochy-vyber" name="plochy_vyber" value="' + vyberCsv + '">'
+            + '<div class="kp-plochy-drop">' + opts + '</div>'
+            + '</div>';
+    }
+
     // Otvor fixne pozicovaný dropdown pod tlačidlom; ak dole nie je miesto, otoč ho nahor
     function openFixedDrop($btn, $drop) {
         var rect = $btn[0].getBoundingClientRect();
@@ -327,6 +349,8 @@
             action: 'kass_pub_save_vylep', nonce: KP.nonce, id: id,
             platba:            $tr.find('.kp-platba-hidden').val() || 'Zadarmo',
             format:            $tr.find('.kp-format').val(),
+            plochy_sposob:     $tr.find('.kp-plochy-sposob').val() || 'vsetky',
+            plochy_vyber:      $tr.find('.kp-plochy-vyber').val() || '',
             organizacia_id:    orgId,
             organizacia_nazov: orgNazov,
             nazov_akcie:       $tr.find('.kp-akcia').val(),
@@ -352,6 +376,7 @@
                 $tr.find('.kp-btn-fakt').attr('href', KP.faktUrl + res.data.id);
                 status('Uložené ✓', true);
                 recalcTotals();
+                refreshObsadenostIfOpen();
             } else {
                 status('Chyba pri ukladaní.', false);
             }
@@ -370,6 +395,7 @@
             if (res.success) {
                 $tr.fadeOut(150, function () { $(this).remove(); renumber(); recalcTotals(); });
                 status('Zmazané.', true);
+                refreshObsadenostIfOpen();
             }
         });
     }
@@ -487,6 +513,7 @@
             + '<td class="kp-num"><span class="kp-num-edit" contenteditable="true">' + num + '</span>.</td>'
             + '<td>' + platbaDropHtml('Zadarmo') + '</td>'
             + '<td>' + fmtDropHtml('A3') + '</td>'
+            + '<td>' + plochyDropHtml('vsetky', '') + '</td>'
             + '<td><div class="kp-ac-wrap">'
             +   '<input type="text" class="kp-inp kp-ac-input" placeholder="Začni písať…" autocomplete="off">'
             +   '<input type="hidden" class="kp-ac-id" value="0">'
@@ -511,6 +538,106 @@
             +   '<a href="#" class="kp-btn-fakt" title="Podklad k faktúre">📄</a>'
             +   '<button type="button" class="kp-btn-del" title="Zmazať">✕</button>'
             + '</td></tr>';
+    }
+
+    /* ===== PLOCHY (vizualizácia obsadenosti) ===== */
+    var plochyTabOpen    = false;
+    var plochyObsadenost = null; // [plocha_id => {A4,A3,A2,A1}]
+    var plochySelectedId = null;
+
+    function fetchObsadenost(cb) {
+        $.post(KP.ajax, { action: 'kass_pub_get_obsadenost', nonce: KP.nonce }, function (res) {
+            if (res.success) { plochyObsadenost = res.data; }
+            if (cb) { cb(); }
+        });
+    }
+
+    function refreshObsadenostIfOpen() {
+        if (!plochyTabOpen) { return; }
+        fetchObsadenost(function () { renderPlochyDetail(plochySelectedId); });
+    }
+
+    function renderPlochySelector() {
+        var $sel = $('#kp-plochy-selector').empty();
+        if (plochySelectedId === null && KP.plochy && KP.plochy.length) { plochySelectedId = KP.plochy[0].id; }
+        (KP.plochy || []).forEach(function (p) {
+            var tagy = [];
+            if (p.top10) { tagy.push('t10'); }
+            if (p.top15) { tagy.push('t15'); }
+            if (p.top20) { tagy.push('t20'); }
+            var $btn = $('<button type="button" class="kp-plochy-sel-btn"></button>')
+                .text(p.cislo)
+                .attr('title', p.nazov || ('Plocha ' + p.cislo))
+                .attr('data-id', p.id)
+                .addClass(tagy.map(function (t) { return 'kp-plochy-tag-' + t; }).join(' '));
+            $sel.append($btn);
+        });
+        updateSelectorActive();
+    }
+
+    function updateSelectorActive() {
+        $('#kp-plochy-selector .kp-plochy-sel-btn').removeClass('active').each(function () {
+            if (parseInt($(this).attr('data-id'), 10) === plochySelectedId) { $(this).addClass('active'); }
+        });
+    }
+
+    var PLOCHY_FORMATY = ['A4', 'A3', 'A2', 'A1'];
+
+    function renderPlochyDetail(plochaId) {
+        var p = (KP.plochy || []).filter(function (x) { return x.id === plochaId; })[0];
+        var $detail = $('#kp-plochy-detail').empty();
+        if (!p) { return; }
+
+        var obsZa = (plochyObsadenost && plochyObsadenost[plochaId]) || { A4: 0, A3: 0, A2: 0, A1: 0 };
+
+        var $title = $('<div class="kp-plochy-rect-title"></div>').text(p.cislo + '. ' + (p.nazov || ''));
+        $detail.append($title);
+
+        if (!p.sloty || !p.sloty.length) {
+            $detail.append($('<div class="kp-plochy-no-sloty"></div>').text('Táto plocha ešte nemá nastavené rozloženie — nastavte ho v Administrácia → Plochy.'));
+            return;
+        }
+
+        // Kapacita podľa formátu (počet slotov daného formátu)
+        var kapacita = { A4: 0, A3: 0, A2: 0, A1: 0 };
+        p.sloty.forEach(function (f) { if (kapacita[f] != null) { kapacita[f]++; } });
+
+        // Súhrn nad mriežkou
+        var $sum = $('<div class="kp-plochy-sum"></div>');
+        PLOCHY_FORMATY.forEach(function (f) {
+            if (!kapacita[f]) { return; }
+            var obsadene = obsZa[f] || 0;
+            var $b = $('<span class="kp-plochy-sum-item"></span>').text(f + ': ' + obsadene + '/' + kapacita[f]);
+            if (obsadene > kapacita[f]) { $b.addClass('kp-plochy-over'); }
+            $sum.append($b);
+        });
+        $detail.append($sum);
+
+        // Mriežka slotov — vyplň prvých N slotov daného formátu podľa obsadenosti
+        var pocitadlo = { A4: 0, A3: 0, A2: 0, A1: 0 };
+        var $grid = $('<div class="kp-plochy-rect"></div>').css('grid-template-columns', 'repeat(' + (p.mriezkaStlpcov || 4) + ', 1fr)');
+        p.sloty.forEach(function (f) {
+            pocitadlo[f]++;
+            var obsadene = pocitadlo[f] <= (obsZa[f] || 0);
+            var over = obsadene && (obsZa[f] || 0) > (kapacita[f] || 0) && pocitadlo[f] === kapacita[f];
+            var $slot = $('<div class="kp-plochy-slot"></div>').addClass('kp-plochy-slot-' + f)
+                .toggleClass('kp-plochy-slot-full', obsadene)
+                .toggleClass('kp-plochy-slot-over', over)
+                .text(f);
+            $grid.append($slot);
+        });
+        $detail.append($grid);
+    }
+
+    function openPlochyTab() {
+        plochyTabOpen = true;
+        $('#kp-app').addClass('kp-view-plochy');
+        if (!$('#kp-plochy-selector').children().length) { renderPlochySelector(); }
+        fetchObsadenost(function () { renderPlochyDetail(plochySelectedId); });
+    }
+    function closePlochyTab() {
+        plochyTabOpen = false;
+        $('#kp-app').removeClass('kp-view-plochy');
     }
 
     /* ===== INIT ===== */
@@ -617,6 +744,68 @@
         });
         // Zatvoriť kliknutím mimo
         $(document).on('click', function () { $('.kp-platba-drop').removeClass('open'); });
+
+        // Plochy dropdown — otvoriť/zatvoriť
+        var $plochyRow = null;
+        $tbody.on('click', '.kp-plochy-btn', function (e) {
+            e.stopPropagation();
+            var $btn  = $(this);
+            var $drop = $btn.siblings('.kp-plochy-drop');
+            var wasOpen = $drop.hasClass('open');
+            $('.kp-plochy-drop').removeClass('open');
+            if (!wasOpen) { openFixedDrop($btn, $drop); }
+        });
+        $tbody.on('click', '.kp-plochy-opt', function (e) {
+            e.stopPropagation();
+            var $wrap = $(this).closest('.kp-plochy-wrap');
+            var val   = $(this).data('val');
+            var $tr   = $(this).closest('tr');
+            $wrap.find('.kp-plochy-drop').removeClass('open');
+            if (val === 'vyber') {
+                $plochyRow = $tr;
+                plochyPickerOpen($wrap.find('.kp-plochy-vyber').val());
+                return;
+            }
+            var labely = { vsetky: '26', top10: 'T10', top15: 'T15', top20: 'T20' };
+            $wrap.find('.kp-plochy-btn').text(labely[val] || val).attr('data-val', val);
+            $wrap.find('.kp-plochy-sposob').val(val);
+            $wrap.find('.kp-plochy-vyber').val('');
+            scheduleSave($tr);
+        });
+        $(document).on('click', function () { $('.kp-plochy-drop').removeClass('open'); });
+
+        // Výber konkrétnych plôch — modal s checkboxami
+        var $plochyPickerModal = $('#kp-plochy-picker-modal');
+        function plochyPickerOpen(vyberCsv) {
+            var vybrane = (vyberCsv || '').split(',').filter(function (s) { return s; });
+            var $grid = $('#kp-plochy-picker-grid').empty();
+            (KP.plochy || []).forEach(function (p) {
+                var checked = vybrane.indexOf(String(p.id)) !== -1;
+                var $lbl = $('<label class="kp-plochy-picker-item"></label>');
+                $('<input type="checkbox">').val(p.id).prop('checked', checked).appendTo($lbl);
+                $lbl.append(' ' + p.cislo + '. ' + (p.nazov || ''));
+                $grid.append($lbl);
+            });
+            $plochyPickerModal.addClass('open');
+        }
+        $('#kp-plochy-picker-cancel, #kp-plochy-picker-close').on('click', function () {
+            $plochyPickerModal.removeClass('open');
+            $plochyRow = null;
+        });
+        $plochyPickerModal.on('click', function (e) { if (e.target === this) { $plochyPickerModal.removeClass('open'); $plochyRow = null; } });
+        $('#kp-plochy-picker-ok').on('click', function () {
+            if (!$plochyRow) { return; }
+            var ids = [];
+            $('#kp-plochy-picker-grid input:checked').each(function () { ids.push(this.value); });
+            var csv = ids.join(',');
+            var $wrap = $plochyRow.find('.kp-plochy-wrap');
+            $wrap.find('.kp-plochy-btn').text(ids.length + ' pl.').attr('data-val', 'vyber');
+            $wrap.find('.kp-plochy-sposob').val('vyber');
+            $wrap.find('.kp-plochy-vyber').val(csv);
+            scheduleSave($plochyRow);
+            $plochyPickerModal.removeClass('open');
+            $plochyRow = null;
+        });
 
         /* ===== TLAČ MODAL ===== */
         var $tlacModal = $('#kp-tlac-modal');
@@ -839,6 +1028,16 @@
             applyFilter();
         });
 
+        // Záložka Plochy
+        $('#kp-btn-plochy').on('click', function () {
+            if (plochyTabOpen) { closePlochyTab(); } else { openPlochyTab(); }
+        });
+        $('#kp-plochy-selector').on('click', '.kp-plochy-sel-btn', function () {
+            plochySelectedId = parseInt($(this).attr('data-id'), 10);
+            updateSelectorActive();
+            renderPlochyDetail(plochySelectedId);
+        });
+
         // Aplikácia je position: fixed — presuň ju priamo pod <body>, aby jej
         // pozíciu nemohol ovplyvniť žiadny wrapper témy (transform/filter mení
         // referenčný bod fixed elementov). Zároveň zamkni rolovanie stránky.
@@ -891,7 +1090,7 @@
             var wrap = document.querySelector('.kp-table-wrap');
             if (!wrap) { return; }
             if (wrap.contains(e.target)) { return; } // vnútri tabuľky funguje natívne
-            if (e.target.closest && e.target.closest('.kp-modal-overlay, .kp-tlac-modal, .kp-ac-drop, .kp-platba-drop, .kp-fmt-drop, .flatpickr-calendar')) { return; }
+            if (e.target.closest && e.target.closest('.kp-modal-overlay, .kp-tlac-modal, .kp-ac-drop, .kp-platba-drop, .kp-fmt-drop, .kp-plochy-drop, .flatpickr-calendar')) { return; }
             wrap.scrollTop += e.deltaY;
         }, { passive: true });
     });
