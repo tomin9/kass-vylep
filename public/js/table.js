@@ -739,14 +739,19 @@
         $detail.append($('<div class="kp-plochy-board"></div>').append(plochySvg(top, bot, items)));
     }
 
+    function setActiveTab(name) {
+        $('#kp-tabs .kp-tab').removeClass('active').filter('[data-tab="' + name + '"]').addClass('active');
+    }
     function openPlochyTab() {
         plochyTabOpen = true;
+        setActiveTab('plochy');
         $('#kp-app').addClass('kp-view-plochy');
         if (!$('#kp-plochy-selector').children().length) { renderPlochySelector(); }
         fetchObsadenost(function () { renderPlochyDetail(plochySelectedId); });
     }
     function closePlochyTab() {
         plochyTabOpen = false;
+        setActiveTab('tabulka');
         $('#kp-app').removeClass('kp-view-plochy');
     }
 
@@ -1140,8 +1145,8 @@
         });
 
         // Záložka Plochy
-        $('#kp-btn-plochy').on('click', function () {
-            if (plochyTabOpen) { closePlochyTab(); } else { openPlochyTab(); }
+        $('#kp-tabs').on('click', '.kp-tab', function () {
+            if ($(this).attr('data-tab') === 'plochy') { openPlochyTab(); } else { closePlochyTab(); }
         });
         $('#kp-plochy-selector').on('click', '.kp-plochy-sel-btn', function () {
             plochySelectedId = parseInt($(this).attr('data-id'), 10);

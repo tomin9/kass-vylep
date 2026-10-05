@@ -237,6 +237,12 @@ class KASS_Vylep_Public {
                 </div>
             </div>
 
+            <!-- Záložky -->
+            <div class="kp-tabs" id="kp-tabs">
+                <button type="button" class="kp-tab active" data-tab="tabulka">📋 Tabuľka</button>
+                <button type="button" class="kp-tab" data-tab="plochy">🧱 Plochy</button>
+            </div>
+
             <!-- Toolbar -->
             <div class="kp-toolbar">
                 <div class="kp-toolbar-left">
@@ -277,7 +283,6 @@ class KASS_Vylep_Public {
                     <span id="kp-status" class="kp-status"></span>
                     <span id="kp-count" class="kp-count"></span>
                     <button id="kp-btn-vylep-list" class="kp-btn-print" type="button" onclick="kassVylepList()">📋 Výlep</button>
-                    <button id="kp-btn-plochy" class="kp-btn-print" type="button">🧱 Plochy</button>
                     <button class="kp-btn-print" onclick="window.print()" type="button">🖨 Tlačiť</button>
                 </div>
             </div>
