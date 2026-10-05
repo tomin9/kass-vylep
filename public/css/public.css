@@ -628,16 +628,17 @@ input[type="number"].kp-inp { text-align: center; }
 .kp-plochy-mode-btn.active { background: #c0392b; border-color: #c0392b; color: #fff; }
 
 /* ===== ZÁLOŽKY Tabuľka / Plochy ===== */
-.kp-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+.kp-tabs { display: flex; gap: 4px; margin-right: 6px; }
 .kp-tab {
     background: rgba(255,255,255,.06); color: rgba(255,255,255,.7); cursor: pointer;
     border: 1px solid rgba(255,255,255,.12); border-radius: 8px;
-    padding: 7px 18px; font-size: 13px; font-weight: 600;
+    padding: 7px 14px; font-size: 13px; font-weight: 600; white-space: nowrap;
 }
 .kp-tab:hover { background: rgba(255,255,255,.12); color: #fff; }
 .kp-tab.active { background: #c0392b; border-color: #c0392b; color: #fff; }
 /* V záložke Plochy sa skryjú ovládače tabuľky (pridať riadok, filtre) */
-.kp-app.kp-view-plochy .kp-toolbar-left { visibility: hidden; }
+.kp-app.kp-view-plochy .kp-btn-add,
+.kp-app.kp-view-plochy .kp-filter-wrap { display: none; }
 
 /* ===== ZÁLOŽKA PLOCHY ===== */
 .kp-plochy-view {

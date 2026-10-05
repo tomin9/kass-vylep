@@ -237,15 +237,13 @@ class KASS_Vylep_Public {
                 </div>
             </div>
 
-            <!-- Záložky -->
-            <div class="kp-tabs" id="kp-tabs">
-                <button type="button" class="kp-tab active" data-tab="tabulka">📋 Tabuľka</button>
-                <button type="button" class="kp-tab" data-tab="plochy">🧱 Plochy</button>
-            </div>
-
             <!-- Toolbar -->
             <div class="kp-toolbar">
                 <div class="kp-toolbar-left">
+                    <div class="kp-tabs" id="kp-tabs">
+                        <button type="button" class="kp-tab active" data-tab="tabulka">📋 Tabuľka</button>
+                        <button type="button" class="kp-tab" data-tab="plochy">🧱 Plochy</button>
+                    </div>
                     <button class="kp-btn-add" id="kp-add-row" type="button">+ Pridať riadok</button>
                     <!-- Filter organizácie -->
                     <div class="kp-filter-wrap">
