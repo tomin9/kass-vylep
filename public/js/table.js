@@ -53,24 +53,17 @@
     }
 
     var PLOCHY_LABELY = { vsetky: '26', top10: 'T10', top15: 'T15', top20: 'T20' };
-    function plochyDropHtml(sposob, vyberCsv) {
+    function plochyLabel(sposob, vyberCsv) {
+        if (PLOCHY_LABELY[sposob]) { return PLOCHY_LABELY[sposob]; }
+        return (vyberCsv || '').split(',').filter(function (s) { return s; }).length + ' pl.';
+    }
+    function plochyCellHtml(sposob, vyberCsv) {
         sposob = sposob || 'vsetky';
         vyberCsv = vyberCsv || '';
-        var label = PLOCHY_LABELY[sposob];
-        if (!label) {
-            var n = vyberCsv.split(',').filter(function (s) { return s; }).length;
-            label = n + ' pl.';
-        }
-        var opts = '<div class="kp-plochy-opt" data-val="vsetky">26 (všetky)</div>'
-            + '<div class="kp-plochy-opt" data-val="top10">TOP 10</div>'
-            + '<div class="kp-plochy-opt" data-val="top15">TOP 15</div>'
-            + '<div class="kp-plochy-opt" data-val="top20">TOP 20</div>'
-            + '<div class="kp-plochy-opt kp-plochy-opt-vyber" data-val="vyber">Vybrať plochy…</div>';
         return '<div class="kp-plochy-wrap">'
-            + '<div class="kp-plochy-btn" data-val="' + sposob + '">' + label + '</div>'
+            + '<div class="kp-plochy-btn" data-val="' + sposob + '" title="Priradiť plochy">' + plochyLabel(sposob, vyberCsv) + '</div>'
             + '<input type="hidden" class="kp-plochy-sposob" name="plochy_sposob" value="' + sposob + '">'
             + '<input type="hidden" class="kp-plochy-vyber" name="plochy_vyber" value="' + vyberCsv + '">'
-            + '<div class="kp-plochy-drop">' + opts + '</div>'
             + '</div>';
     }
 
@@ -513,7 +506,7 @@
             + '<td class="kp-num"><span class="kp-num-edit" contenteditable="true">' + num + '</span>.</td>'
             + '<td>' + platbaDropHtml('Zadarmo') + '</td>'
             + '<td>' + fmtDropHtml('A3') + '</td>'
-            + '<td>' + plochyDropHtml('vsetky', '') + '</td>'
+            + '<td>' + plochyCellHtml('vsetky', '') + '</td>'
             + '<td><div class="kp-ac-wrap">'
             +   '<input type="text" class="kp-inp kp-ac-input" placeholder="Začni písať…" autocomplete="off">'
             +   '<input type="hidden" class="kp-ac-id" value="0">'
@@ -745,66 +738,51 @@
         // Zatvoriť kliknutím mimo
         $(document).on('click', function () { $('.kp-platba-drop').removeClass('open'); });
 
-        // Plochy dropdown — otvoriť/zatvoriť
-        var $plochyRow = null;
-        $tbody.on('click', '.kp-plochy-btn', function (e) {
-            e.stopPropagation();
-            var $btn  = $(this);
-            var $drop = $btn.siblings('.kp-plochy-drop');
-            var wasOpen = $drop.hasClass('open');
-            $('.kp-plochy-drop').removeClass('open');
-            if (!wasOpen) { openFixedDrop($btn, $drop); }
-        });
-        $tbody.on('click', '.kp-plochy-opt', function (e) {
-            e.stopPropagation();
-            var $wrap = $(this).closest('.kp-plochy-wrap');
-            var val   = $(this).data('val');
-            var $tr   = $(this).closest('tr');
-            $wrap.find('.kp-plochy-drop').removeClass('open');
-            if (val === 'vyber') {
-                $plochyRow = $tr;
-                plochyPickerOpen($wrap.find('.kp-plochy-vyber').val());
-                return;
-            }
-            var labely = { vsetky: '26', top10: 'T10', top15: 'T15', top20: 'T20' };
-            $wrap.find('.kp-plochy-btn').text(labely[val] || val).attr('data-val', val);
-            $wrap.find('.kp-plochy-sposob').val(val);
-            $wrap.find('.kp-plochy-vyber').val('');
-            scheduleSave($tr);
-        });
-        $(document).on('click', function () { $('.kp-plochy-drop').removeClass('open'); });
+        // Plochy — modal (rovnaký vzor ako Tlač)
+        var $plochyRow   = null;
+        var $plochyModal = $('#kp-plochy-modal');
+        var plochyMode   = 'vsetky';
 
-        // Výber konkrétnych plôch — modal s checkboxami
-        var $plochyPickerModal = $('#kp-plochy-picker-modal');
-        function plochyPickerOpen(vyberCsv) {
-            var vybrane = (vyberCsv || '').split(',').filter(function (s) { return s; });
+        function plochySetMode(mode) {
+            plochyMode = mode;
+            $('#kp-plochy-modes .kp-plochy-mode-btn').removeClass('active').filter('[data-val="' + mode + '"]').addClass('active');
+            $('#kp-plochy-picker-grid').toggle(mode === 'vyber');
+        }
+        function plochyOpen($tr) {
+            $plochyRow = $tr;
+            var mode  = $tr.find('.kp-plochy-sposob').val() || 'vsetky';
+            var vybrane = ($tr.find('.kp-plochy-vyber').val() || '').split(',').filter(function (s) { return s; });
             var $grid = $('#kp-plochy-picker-grid').empty();
             (KP.plochy || []).forEach(function (p) {
-                var checked = vybrane.indexOf(String(p.id)) !== -1;
                 var $lbl = $('<label class="kp-plochy-picker-item"></label>');
-                $('<input type="checkbox">').val(p.id).prop('checked', checked).appendTo($lbl);
+                $('<input type="checkbox">').val(p.id).prop('checked', vybrane.indexOf(String(p.id)) !== -1).appendTo($lbl);
                 $lbl.append(' ' + p.cislo + '. ' + (p.nazov || ''));
                 $grid.append($lbl);
             });
-            $plochyPickerModal.addClass('open');
+            plochySetMode(mode);
+            $plochyModal.addClass('open');
         }
-        $('#kp-plochy-picker-cancel, #kp-plochy-picker-close').on('click', function () {
-            $plochyPickerModal.removeClass('open');
-            $plochyRow = null;
-        });
-        $plochyPickerModal.on('click', function (e) { if (e.target === this) { $plochyPickerModal.removeClass('open'); $plochyRow = null; } });
-        $('#kp-plochy-picker-ok').on('click', function () {
+        function plochyClose() { $plochyModal.removeClass('open'); $plochyRow = null; }
+
+        $tbody.on('click', '.kp-plochy-btn', function () { plochyOpen($(this).closest('tr')); });
+        $('#kp-plochy-modes').on('click', '.kp-plochy-mode-btn', function () { plochySetMode($(this).attr('data-val')); });
+        $('#kp-plochy-cancel').on('click', plochyClose);
+        $plochyModal.on('click', function (e) { if (e.target === this) { plochyClose(); } });
+        $('#kp-plochy-ok').on('click', function () {
             if (!$plochyRow) { return; }
-            var ids = [];
-            $('#kp-plochy-picker-grid input:checked').each(function () { ids.push(this.value); });
-            var csv = ids.join(',');
+            var csv = '';
+            if (plochyMode === 'vyber') {
+                var ids = [];
+                $('#kp-plochy-picker-grid input:checked').each(function () { ids.push(this.value); });
+                if (!ids.length) { plochySetMode('vsetky'); }
+                csv = ids.join(',');
+            }
             var $wrap = $plochyRow.find('.kp-plochy-wrap');
-            $wrap.find('.kp-plochy-btn').text(ids.length + ' pl.').attr('data-val', 'vyber');
-            $wrap.find('.kp-plochy-sposob').val('vyber');
+            $wrap.find('.kp-plochy-btn').text(plochyLabel(plochyMode, csv)).attr('data-val', plochyMode);
+            $wrap.find('.kp-plochy-sposob').val(plochyMode);
             $wrap.find('.kp-plochy-vyber').val(csv);
             scheduleSave($plochyRow);
-            $plochyPickerModal.removeClass('open');
-            $plochyRow = null;
+            plochyClose();
         });
 
         /* ===== TLAČ MODAL ===== */
@@ -1090,7 +1068,7 @@
             var wrap = document.querySelector('.kp-table-wrap');
             if (!wrap) { return; }
             if (wrap.contains(e.target)) { return; } // vnútri tabuľky funguje natívne
-            if (e.target.closest && e.target.closest('.kp-modal-overlay, .kp-tlac-modal, .kp-ac-drop, .kp-platba-drop, .kp-fmt-drop, .kp-plochy-drop, .flatpickr-calendar')) { return; }
+            if (e.target.closest && e.target.closest('.kp-modal-overlay, .kp-tlac-modal, .kp-ac-drop, .kp-platba-drop, .kp-fmt-drop, .flatpickr-calendar')) { return; }
             wrap.scrollTop += e.deltaY;
         }, { passive: true });
     });
