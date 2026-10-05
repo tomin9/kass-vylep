@@ -623,9 +623,10 @@ input[type="number"].kp-inp { text-align: center; }
     background: rgba(15,15,15,.85);
     padding: 16px;
 }
+/* !important + vyššia špecificita: prebije aj starú CSS poistku v téme (.kp-table-wrap { display:flex !important }) */
 .kp-app.kp-view-plochy .kp-head-wrap,
-.kp-app.kp-view-plochy .kp-table-wrap { display: none; }
-.kp-app.kp-view-plochy .kp-plochy-view { display: block; }
+.kp-app.kp-view-plochy .kp-table-wrap { display: none !important; }
+.kp-app.kp-view-plochy .kp-plochy-view { display: block !important; }
 
 .kp-plochy-selector { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
 .kp-plochy-sel-btn {
