@@ -95,13 +95,14 @@ class KASS_Vylep_Plochy {
 
     /**
      * Obsadenosť všetkých plôch (aktuálne prebiehajúce výlepy k dátumu $datum).
-     * Vráti [plocha_id => ['A1v'=>n,'A2s'=>n,'A3v'=>n,'A2v'=>n,'A3s'=>n,'A1s'=>n,'A4'=>n]].
+     * Vráti [plocha_id => ['A1v'=>[{o,a},...], 'A2s'=>[...], ...]] — pre každý kľúč zoznam
+     * plagátov (o = organizácia, a = názov podujatia); počet = dĺžka zoznamu.
      */
     public static function obsadenost_vsetky( $datum = null ) {
         $datum = $datum ?: current_time( 'Y-m-d' );
         $plochy = self::get_all();
 
-        $prazdne = array_fill_keys( self::kluce(), 0 );
+        $prazdne = array_fill_keys( self::kluce(), array() );
         $obsadenost = array();
         foreach ( $plochy as $p ) {
             $obsadenost[ (int) $p->id ] = $prazdne;
@@ -113,7 +114,10 @@ class KASS_Vylep_Plochy {
             $ids  = self::resolve_ids( $v->plochy_sposob ?? 'vsetky', $v->plochy_vyber ?? '', $plochy );
             foreach ( $ids as $pid ) {
                 if ( isset( $obsadenost[ $pid ] ) ) {
-                    $obsadenost[ $pid ][ $kluc ]++;
+                    $obsadenost[ $pid ][ $kluc ][] = array(
+                        'o' => (string) ( $v->organizacia_nazov ?? '' ),
+                        'a' => (string) ( $v->nazov_akcie ?? '' ),
+                    );
                 }
             }
         }

@@ -666,10 +666,13 @@ input[type="number"].kp-inp { text-align: center; }
 .kp-pl-A1v, .kp-pl-A1s { fill: rgba(96,165,250,.45); }
 .kp-pl-A2v, .kp-pl-A2s { fill: rgba(74,222,128,.40); }
 .kp-pl-A3v, .kp-pl-A3s { fill: rgba(245,158,11,.45); }
-.kp-pl-label {
-    fill: #fff; font-size: 13px; font-weight: 700;
-    text-anchor: middle; dominant-baseline: central; pointer-events: none;
+.kp-pl-txt {
+    width: 100%; height: 100%; box-sizing: border-box; padding: 2px;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; color: #fff; font-weight: 600; line-height: 1.2;
+    overflow: hidden; word-break: break-word;
 }
+.kp-pl-txt-in { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; max-width: 100%; }
 
 /* ===== PLOCHY — výber konkrétnych plôch (modal) ===== */
 .kp-plochy-picker-grid {
