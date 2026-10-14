@@ -73,6 +73,8 @@ h1.wp-heading-inline { display:none !important; }
     color: #fff !important;
 }
 .kass-fakt-toolbar .button-primary:hover { background: #1d4ed8 !important; }
+.kass-fakt-toolbar input[type=number] { background: rgba(255,255,255,.08) !important; color: #e5e7eb !important; border: 1px solid rgba(255,255,255,.2) !important; border-radius: 6px; font-size: 13px; }
+.kass-fakt-toolbar .fakt-zaznam { display:inline-flex; gap:8px; align-items:center; margin-left:12px; flex-wrap:wrap; }
 .kass-fakt-toolbar .description { color: rgba(255,255,255,.45) !important; font-size: 12px; }
 </style>
 </head>

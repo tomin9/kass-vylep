@@ -31,9 +31,9 @@ foreach ( $organizacie as $o ) {
 $cennik_js = KASS_Vylep_Cennik::get_js_matrix();
 
 // Položky pre podklad k fakturácii: výlep + prípadná samostatná položka Tlač
-$polozky_js = array();
-foreach ( $polozky_init as $v ) {
-    $polozky_js[] = array(
+function kass_fakt_polozky( $v ) {
+    $out = array();
+    $out[] = array(
         'popis'     => $v->nazov_akcie,
         'fmt'       => $v->format,
         'oi'        => max( 0, (int) $v->tyzdne - 1 ),
@@ -50,7 +50,7 @@ foreach ( $polozky_init as $v ) {
     }
     if ( $tlac_bez > 0 ) {
         $tlac_kusy = max( 1, (int) $v->kusy ); // rovnaký počet kusov ako výlep
-        $polozky_js[] = array(
+        $out[] = array(
             'popis'     => 'Tlač – ' . $v->nazov_akcie,
             'fmt'       => $v->format,
             'oi'        => 0,
@@ -63,7 +63,32 @@ foreach ( $polozky_init as $v ) {
             'hasPeriod' => false, // tlač nemá obdobie výlepu
         );
     }
+    return $out;
 }
+
+$polozky_js = array();
+foreach ( $polozky_init as $v ) {
+    $polozky_js = array_merge( $polozky_js, kass_fakt_polozky( $v ) );
+}
+
+// Zoznam výlepov na ručné pridanie podľa čísla riadku (číslovanie rovnaké ako v tabuľke: podľa roka, od 1)
+$zoznam_js = array();
+$roky = array();
+foreach ( KASS_Vylep_DB::get_vylepy() as $v ) {
+    $rok = (int) substr( (string) $v->datum_od, 0, 4 );
+    if ( ! isset( $zoznam_js[ $rok ] ) ) { $zoznam_js[ $rok ] = array(); }
+    $zoznam_js[ $rok ][] = array(
+        'id'    => (int) $v->id,
+        'org'   => (string) $v->organizacia_nazov,
+        'akcia' => (string) $v->nazov_akcie,
+        'od'    => (string) $v->datum_od,
+        'p'     => kass_fakt_polozky( $v ),
+    );
+}
+krsort( $zoznam_js );
+$rok_init = date( 'Y' );
+if ( ! empty( $polozky_init ) ) { $rok_init = substr( (string) $polozky_init[0]->datum_od, 0, 4 ); }
+if ( ! isset( $zoznam_js[ (int) $rok_init ] ) && $zoznam_js ) { $rok_init = (string) array_key_first( $zoznam_js ); }
 ?>
 <div class="wrap kass-wrap kass-faktura-wrap">
 <h1 class="kass-noprint" style="<?php echo ! empty( $_GET['embed'] ) ? 'display:none;' : ''; ?>">Podklad k fakturácii</h1>
@@ -78,6 +103,21 @@ foreach ( $polozky_init as $v ) {
         </select>
     </label>
     <button type="button" class="button" id="fakt-pridat">+ Pridať položku</button>
+    <span class="fakt-zaznam">
+        <label>Výlep z tabuľky – rok:
+            <select id="fakt-rok">
+                <?php foreach ( array_keys( $zoznam_js ) as $r ) : ?>
+                    <option value="<?php echo (int) $r; ?>" <?php selected( (int) $rok_init, (int) $r ); ?>><?php echo (int) $r; ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label>č. riadku:
+            <input type="number" id="fakt-cislo" min="1" style="width:70px;" list="fakt-cisla">
+        </label>
+        <datalist id="fakt-cisla"></datalist>
+        <button type="button" class="button" id="fakt-pridat-cislo">+ Pridať výlep č.</button>
+        <span id="fakt-cislo-info" class="description"></span>
+    </span>
     <button type="button" class="button button-primary" onclick="window.print()">🖨 Tlačiť / uložiť PDF</button>
     <span class="description">Vyber odberateľa — údaje sa načítajú. Potom doplň položky a vytlač.</span>
 </div>
@@ -198,6 +238,7 @@ window.KASSFakt = {
     obdobia: ["1 týždeň","2 týždne","3 týždne","4 týždne","5 týždňov"],
     formaty: ["A4","A3","A2","A1"],
     init: <?php echo wp_json_encode( $polozky_js ); ?>,
+    zoznam: <?php echo wp_json_encode( $zoznam_js ); ?>,
     predvybrany: <?php echo (int) $predvybrany_org; ?>
 };
 </script>

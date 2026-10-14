@@ -104,6 +104,7 @@
                 cena:  (data.cena != null) ? data.cena : null,
                 od:    data.od    || '',
                 do:    data.do    || '',
+                blank: !!data.blank,
                 manual: !!data.manual, // pevná cena (napr. položka Tlač) — nepočíta sa z cenníka výlepu
                 hasPeriod: data.hasPeriod !== false // false = bez obdobia výlepu (napr. položka Tlač)
             });
@@ -134,17 +135,27 @@
                 var $rf = $('<div class="fa4-row"></div>').append('<b>Formát / počet kusov:</b>');
                 var $sf = $('<select class="faf-sel faf-hidden-sel" style="display:none;"></select>');
                 F.formaty.forEach(function (f) { $('<option>').text(f).prop('selected', f === r.fmt).appendTo($sf); });
-                $sf.on('change', function () { r.fmt = this.value; if (!r.manual) { r.cena = cenaZCennika(r.fmt, r.oi); } render(); });
-                var $kus = $('<input type="number" min="1" style="width:40px;display:none;" class="faf">').val(r.kusy).on('change', function () {
-                    r.kusy = Math.max(1, parseInt(this.value, 10) || 1); render();
+                $sf.on('change', function () { r.fmt = this.value; if (!r.manual) { r.cena = cenaZCennika(r.fmt, r.oi); } prepocitajRiadok(); });
+                var $kus = $('<input type="number" min="1" style="width:60px;display:none;" class="faf">').val(r.kusy).on('input change', function () {
+                    r.kusy = Math.max(1, parseInt(this.value, 10) || 1); prepocitajRiadok();
                 });
                 var $txt = $('<span class="fa4-plain-txt" style="cursor:pointer;" title="Klikni pre úpravu"></span>')
                     .text(r.fmt + ' / ' + r.kusy + ' ks')
                     .on('click', function () {
                         $txt.hide(); $sf.show().focus(); $kus.show();
                     });
-                $sf.on('blur', function () { setTimeout(function () { $txt.text(r.fmt + ' / ' + r.kusy + ' ks').show(); $sf.hide(); $kus.hide(); }, 200); });
-                $kus.on('blur', function () { setTimeout(function () { $txt.text(r.fmt + ' / ' + r.kusy + ' ks').show(); $sf.hide(); $kus.hide(); }, 200); });
+                // Editor sa zavrie až keď fokus opustí celú dvojicu (formát + kusy), nie pri prechode medzi poľami
+                var fmtTimer = null;
+                function zavriFmt() {
+                    fmtTimer = setTimeout(function () {
+                        var a = document.activeElement;
+                        if (a === $sf[0] || a === $kus[0]) { return; }
+                        $txt.text(r.fmt + ' / ' + r.kusy + ' ks').show(); $sf.hide(); $kus.hide();
+                    }, 150);
+                }
+                function drzFmt() { clearTimeout(fmtTimer); }
+                $sf.on('blur', zavriFmt).on('focus', drzFmt);
+                $kus.on('blur', zavriFmt).on('focus', drzFmt);
                 $rf.append($txt, $sf, $('<span> / </span>').hide(), $kus, $('<span> ks</span>').hide());
 
                 // Výlep — plain text formát: dd.m. – dd.m. rrrr (n týždňov)
@@ -173,27 +184,36 @@
                 var $soI = $('<select class="faf-sel" style="display:none;width:90px;"></select>');
                 F.obdobia.forEach(function (o, i) { $('<option>').attr('value', i).text(o).prop('selected', i === r.oi).appendTo($soI); });
 
-                function commitDates() {
+                function nacitajDatumy() {
                     r.od = $odI.val(); r.do = $doI.val();
                     r.oi = parseInt($soI.val(), 10);
                     if (!r.manual) { r.cena = cenaZCennika(r.fmt, r.oi); }
-                    $vTxt.html(formatDatumVylep(r.od, r.do, r.oi)).show();
-                    $odI.hide(); $doI.hide(); $soI.hide();
-                    prepocitaj();
+                    prepocitajRiadok();
                 }
+                // Dátumy a obdobie sa zavrú až keď fokus opustí všetky tri polia
+                var datTimer = null;
+                function zavriDatumy() {
+                    datTimer = setTimeout(function () {
+                        var a = document.activeElement;
+                        if (a === $odI[0] || a === $doI[0] || a === $soI[0]) { return; }
+                        nacitajDatumy();
+                        $vTxt.html(formatDatumVylep(r.od, r.do, r.oi)).show();
+                        $odI.hide(); $doI.hide(); $soI.hide();
+                    }, 150);
+                }
+                function drzDatumy() { clearTimeout(datTimer); }
                 $vTxt.on('click', function () { $vTxt.hide(); $odI.show(); $doI.show(); $soI.show(); $odI.focus(); });
-                $odI.on('blur', function () { setTimeout(commitDates, 200); });
-                $doI.on('blur', function () { setTimeout(commitDates, 200); });
-                $soI.on('change', commitDates);
+                $odI.add($doI).add($soI).on('blur', zavriDatumy).on('focus', drzDatumy);
+                $odI.add($doI).on('input change', nacitajDatumy);
+                $soI.on('change', nacitajDatumy);
 
                 $rv.append($vTxt, $odI, $(' – '), $doI, $soI);
                 } // if (r.hasPeriod)
 
                 // Výpočet — plain text, no bold, aligned
                 var $rc = $('<div class="fa4-row" style="margin-bottom:0;"></div>').append('<b>Výpočet:</b>');
-                $rc.append(
-                    $('<span>').text(r.kusy + ' × ' + f4r(r.cena) + ' = ' + f2r(r.cena * r.kusy) + ' €')
-                );
+                var $rcTxt = $('<span>').text(r.kusy + ' × ' + f4r(r.cena) + ' = ' + f2r(r.cena * r.kusy) + ' €');
+                $rc.append($rcTxt);
                 $tdL.append($head, $rf);
                 if ($rv) { $tdL.append($rv); }
                 $tdL.append($rc);
@@ -214,6 +234,14 @@
                 var $tdBotR = $('<td style="text-align:center; padding:0 8px 4px 8px; font-size:9pt; border-left:1.5px solid #000; border-top:none;"></td>').text(f2r(sub) + ' €');
                 $trBot.append($tdBotL, $tdBotR);
                 $tbody.append($trBot);
+
+                // Prepočet tejto položky bez prekreslenia (aby sa neprerušila úprava poľa)
+                function prepocitajRiadok() {
+                    $rcTxt.text(r.kusy + ' × ' + f4r(r.cena) + ' = ' + f2r(r.cena * r.kusy) + ' €');
+                    $tdBotR.text(f2r(r.cena * r.kusy) + ' €');
+                    $txt.text(r.fmt + ' / ' + r.kusy + ' ks');
+                    prepocitaj();
+                }
 
                 // Prázdny riadok pod cena bez DPH
                 var $trEmpty = $('<tr></tr>');
@@ -274,6 +302,36 @@
         $('#fakt-org').on('change', function () { nacitajOrg(this.value); });
         $('#fakt-pridat, #fakt-additem').on('click', function () { addRow(); });
 
+        // Pridanie výlepu z tabuľky podľa čísla riadku (číslovanie ako v tabuľke: podľa roka, od 1)
+        function zoznamRoka() { return (F.zoznam && F.zoznam[$('#fakt-rok').val()]) || []; }
+        function naplnDatalist() {
+            var $dl = $('#fakt-cisla').empty();
+            zoznamRoka().forEach(function (z, i) {
+                $('<option>').attr('value', i + 1).text(z.org + ': ' + z.akcia).appendTo($dl);
+            });
+        }
+        function pridajPodlaCisla() {
+            var n = parseInt($('#fakt-cislo').val(), 10);
+            var z = zoznamRoka()[n - 1];
+            var $info = $('#fakt-cislo-info');
+            if (!z) { $info.text('Riadok č. ' + (isNaN(n) ? '?' : n) + ' v roku ' + $('#fakt-rok').val() + ' neexistuje.'); return; }
+            // prázdna východisková položka sa nahradí prvým pridaným výlepom
+            if (rows.length === 1 && rows[0].blank && rows[0].popis === 'Výlep' && rows[0].kusy === 1 && !rows[0].od) { rows = []; }
+            z.p.forEach(function (p) { addRow(p); });
+            $info.text('Pridané: ' + z.org + ' – ' + z.akcia);
+            var $o = $('#fakt-org');
+            if (!parseInt($o.val(), 10)) {
+                $.each(F.org, function (id, o) {
+                    if (o.nazov === z.org) { $o.val(id); nacitajOrg(id); return false; }
+                });
+            }
+            $('#fakt-cislo').val('').focus();
+        }
+        $('#fakt-rok').on('change', naplnDatalist);
+        $('#fakt-pridat-cislo').on('click', pridajPodlaCisla);
+        $('#fakt-cislo').on('keydown', function (e) { if (e.which === 13) { e.preventDefault(); pridajPodlaCisla(); } });
+        naplnDatalist();
+
         // init — predvyplnenie z URL parametra
         var dnes = new Date().toISOString().slice(0, 10);
 
@@ -298,7 +356,7 @@
         if (F.init && F.init.length) {
             F.init.forEach(function (p) { addRow(p); });
         } else {
-            addRow();
+            addRow({ blank: true });
         }
     }
 
