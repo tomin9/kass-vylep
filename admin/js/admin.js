@@ -265,7 +265,8 @@
         }
 
         function prepocitaj() {
-            var total = rows.reduce(function (s, r) { return s + (r.cena || 0) * r.kusy; }, 0);
+            // súčet zaokrúhlených súm položiek (tak ako sú vytlačené), nie zaokrúhlený súčet nezaokrúhlených
+            var total = rows.reduce(function (s, r) { return s + Math.round((r.cena || 0) * r.kusy * 100) / 100; }, 0);
             $('#fakt-suma').text(f2r(total) + ' €');
         }
 
